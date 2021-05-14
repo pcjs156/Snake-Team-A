@@ -1,89 +1,25 @@
+#ifndef __SNAKE_H__
+#define __SNAKE_H__
+
 #include <vector>
 #include <string>
 #include <iostream>
-#include "Manager.h"
 using namespace std;
 
-/* Snake의 상태를 저장/갱신하기 위한 클래스 */
-class Snake
+class Manager;
+class Item;
+
+/* 좌표를 직관적으로 표시하기 위한 클래스 */
+class Pos
 {
-private:
-    const static int MIN_LENGTH = 3; // 뱀의 최소 몸길이
-    int length;                      // 뱀의 몸 길이
-    int growthCnt;                   // Growth 획득 횟수
-    int poisonCnt;                   // Posion 획득 횟수
-    int gateCnt;                     // Gate 이용 횟수
-    Direction lastDirection;         // Snake의 마지막 이동 방향
-    vector<Body> bodies;             // Snake의 머리와 몸통들을 요소로 하는 벡터
+public:
+    int x;
+    int y;
 
 public:
-    // Constructor
-    Snake(int initX, int initY)
-    {
-        // 몸 길이 초기화
-        length = 3;
-        // 아이템 획득/게이트 통과 횟수 초기화
-        growthCnt = 0;
-        poisonCnt = 0;
-        gateCnt = 0;
+    Pos() {}
 
-        // 왼쪽 방향을 기본 방향으로 함
-        Direction lastDirection = Direction::getDirectionBySymbol('L');
-
-        // 맨 처음에는 ">~~" 이렇게 왼쪽을 보고 움직이도록 설정
-        bodies.push_back(Body(initX, initY, initX - 1, initY));
-        bodies.push_back(Body(initX + 1, initY, initX, initY));
-        bodies.push_back(Body(initX + 2, initY, initX + 1, initY));
-    }
-
-    // Getter ============================================
-    int getLength() { return length; };
-    int getGrowthCnt() { return growthCnt; };
-    int getPoisonCnt() { return poisonCnt; };
-    int getGateCnt() { return gateCnt; };
-    /* body의 맨 앞 레퍼런스를 반환함
-       Precondition: bodies가 비어 있으면 안됨 */
-    Body getHead();
-    /* head의 좌표를 Pos로 반환함 */
-    Pos getHeadPos();
-
-    // Setter =============================================
-    void setLength(int length) { this->length = length; };
-    void setGrowhCnt(int cnt) { this->growthCnt = cnt; };
-    void setPoisonCnt(int cnt) { this->poisonCnt = cnt; };
-    void setGateCnt(int cnt) { this->gateCnt; };
-
-    // 몸 길이 관련 ========================================
-    /* Snake의 길이를 1만큼 줄이는 함수
-     길이를 더 줄일 수 없다면(줄이면 뱀이 죽는다면) 길이를 갱신하지 않고 false를 반환
-     길이를 더 줄일 수 있다면 길이와 Body 정보를 갱신하고 true를 반환 */
-    bool shorten();
-    /* Snake의 길이를 1만큼 늘이고 Body 정보를 갱신하는 함수
-     몸 길이의 상한선이 없으므로 항상 잘 작동하지만, 일관성을 위해 항상 true를 반환 */
-    bool lengthen(Direction newDirection);
-
-    // 아이템 관련 =========================================
-    /* 함수 내부에서 item.affect(*this)를 수행해 snake의 상태를 갱신하고, 게임 종료 여부를 판단함 */
-    bool useItem(Manager &m, Item &item);
-    /* 게이트를 사용해 Body의 위치와 이동 경로를 수정함. 일관성을 위해 항상 true를 반환하도록 설정 */
-    bool useGate(Manager &m, Direction direction);
-
-    // 이동 관련 ============================================
-    /* newDirection 방향으로 Snake를 이동시키고, lastDirection을 갱신함
-       만약 newDirection이 lastDirection과 반대 방향이라면, false를 반환해 게임을 종료할 수 있도록 하고
-       그렇지 않은 경우 true를 반환하여 메서드가 제대로 실행 되었음을 외부에 알림
-       단, 아이템이나 벽 충돌, 몸통 충돌 등으로 인한 게임 종료는 함수 외부에서 판단함 */
-    bool moveTo(Direction newDirection);
-
-    // MapInfo와의 상호작용 ==================================
-    /* 게임 매니저와 상호작용하여 현재 벽에 부딪힌 상태인지(머리가 벽과 겹쳐 있는지) 확인하는 메서드 
-       벽에 부딪힌 상태라면 true, 그렇지 않다면 false를 반환함 */
-    bool isBumpedToWall(Manager &m);
-
-    // 상태 점검 =============================================
-    /* 머리가 자신의 몸통과 부딪혔는지 확인하는 메서드
-       Precondition: moveTo 메서드에 의해 이동이 완전히 끝난 후에 호출해야 함 */
-    bool isBumpedToBody();
+    Pos(int x, int y) : x(x), y(y) {}
 };
 
 /* 방향을 표시하기 위한 클래스. 좌표와 심볼로 표현할 수 있음. */
@@ -139,19 +75,6 @@ public:
     }
 };
 
-/* 좌표를 직관적으로 표시하기 위한 클래스 */
-class Pos
-{
-public:
-    int x;
-    int y;
-
-public:
-    Pos() {}
-
-    Pos(int x, int y) : x(x), y(y) {}
-};
-
 /* Snake를 구성하는 몸통(+머리) */
 class Body
 {
@@ -173,6 +96,11 @@ public:
         scheduleQueue.push_back(Pos(nextX, nextY));
     }
 
+    Pos getPos()
+    {
+        return currentPos;
+    }
+
     /* Body의 현재 위치를 다음 위치로 갱신하고, 수행된 스케줄을 삭제한다.
        수행 결과에 따라 다음의 값을 반환한다.
        true: 정상 수행
@@ -190,3 +118,119 @@ public:
         return true;
     }
 };
+
+/* Snake의 상태를 저장/갱신하기 위한 클래스 */
+class Snake
+{
+private:
+    const static int MIN_LENGTH = 3; // 뱀의 최소 몸길이
+    int length;                      // 뱀의 몸 길이
+    int growthCnt;                   // Growth 획득 횟수
+    int poisonCnt;                   // Posion 획득 횟수
+    int gateCnt;                     // Gate 이용 횟수
+    Direction lastDirection;         // Snake의 마지막 이동 방향
+    vector<Body> bodies;             // Snake의 머리와 몸통들을 요소로 하는 벡터
+
+    // *= 연산자 오버로딩에 사용됨)
+    int initX, initY;
+
+public:
+    // Constructor
+    Snake(int initX, int initY)
+    {
+        // ()= 연산자 오버로딩에 사용됨)
+        this->initX = initX;
+        this->initY = initY;
+
+        // 몸 길이 초기화
+        length = 3;
+        // 아이템 획득/게이트 통과 횟수 초기화
+        growthCnt = 0;
+        poisonCnt = 0;
+        gateCnt = 0;
+
+        // 왼쪽 방향을 기본 방향으로 함
+        Direction lastDirection = Direction::getDirectionBySymbol('L');
+
+        // 맨 처음에는 ">~~" 이렇게 왼쪽을 보고 움직이도록 설정
+        bodies.push_back(Body(initX, initY, initX - 1, initY));
+        bodies.push_back(Body(initX + 1, initY, initX, initY));
+        bodies.push_back(Body(initX + 2, initY, initX + 1, initY));
+    }
+
+    Snake &operator=(const Snake &s)
+    {
+        // ()= 연산자 오버로딩에 사용됨)
+        this->initX = s.initX;
+        this->initY = s.initY;
+
+        // 몸 길이 초기화
+        length = 3;
+        // 아이템 획득/게이트 통과 횟수 초기화
+        growthCnt = 0;
+        poisonCnt = 0;
+        gateCnt = 0;
+
+        // 왼쪽 방향을 기본 방향으로 함
+        Direction lastDirection = Direction::getDirectionBySymbol('L');
+
+        // 맨 처음에는 ">~~" 이렇게 왼쪽을 보고 움직이도록 설정
+        bodies.push_back(Body(initX, initY, initX - 1, initY));
+        bodies.push_back(Body(initX + 1, initY, initX, initY));
+        bodies.push_back(Body(initX + 2, initY, initX + 1, initY));
+
+        return *this;
+    }
+
+    // Getter ============================================
+    int getLength() { return length; }
+    int getGrowthCnt() { return growthCnt; }
+    int getPoisonCnt() { return poisonCnt; }
+    int getGateCnt() { return gateCnt; }
+    vector<Body> getBodies() { return bodies; }
+    /* body의 맨 앞 레퍼런스를 반환함
+       Precondition: bodies가 비어 있으면 안됨 */
+    Body getHead();
+    /* head의 좌표를 Pos로 반환함 */
+    Pos getHeadPos();
+
+    // Setter =============================================
+    void setLength(int length) { this->length = length; };
+    void setGrowhCnt(int cnt) { this->growthCnt = cnt; };
+    void setPoisonCnt(int cnt) { this->poisonCnt = cnt; };
+    void setGateCnt(int cnt) { this->gateCnt; };
+
+    // 몸 길이 관련 ========================================
+    /* Snake의 길이를 1만큼 줄이는 함수
+     길이를 더 줄일 수 없다면(줄이면 뱀이 죽는다면) 길이를 갱신하지 않고 false를 반환
+     길이를 더 줄일 수 있다면 길이와 Body 정보를 갱신하고 true를 반환 */
+    bool shorten();
+    /* Snake의 길이를 1만큼 늘이고 Body 정보를 갱신하는 함수
+     몸 길이의 상한선이 없으므로 항상 잘 작동하지만, 일관성을 위해 항상 true를 반환 */
+    bool lengthen(Direction newDirection);
+
+    // 아이템 관련 =========================================
+    /* 함수 내부에서 item.affect(*this)를 수행해 snake의 상태를 갱신하고, 게임 종료 여부를 판단함 */
+    bool useItem(Manager &m, Item &item);
+    /* 게이트를 사용해 Body의 위치와 이동 경로를 수정함. 일관성을 위해 항상 true를 반환하도록 설정 */
+    bool useGate(Manager &m, Direction direction);
+
+    // 이동 관련 ============================================
+    /* newDirection 방향으로 Snake를 이동시키고, lastDirection을 갱신함
+       만약 newDirection이 lastDirection과 반대 방향이라면, false를 반환해 게임을 종료할 수 있도록 하고
+       그렇지 않은 경우 true를 반환하여 메서드가 제대로 실행 되었음을 외부에 알림
+       단, 아이템이나 벽 충돌, 몸통 충돌 등으로 인한 게임 종료는 함수 외부에서 판단함 */
+    bool moveTo(Direction newDirection);
+
+    // MapInfo와의 상호작용 ==================================
+    /* 게임 매니저와 상호작용하여 현재 벽에 부딪힌 상태인지(머리가 벽과 겹쳐 있는지) 확인하는 메서드 
+       벽에 부딪힌 상태라면 true, 그렇지 않다면 false를 반환함 */
+    bool isBumpedToWall(Manager &m);
+
+    // 상태 점검 =============================================
+    /* 머리가 자신의 몸통과 부딪혔는지 확인하는 메서드
+       Precondition: moveTo 메서드에 의해 이동이 완전히 끝난 후에 호출해야 함 */
+    bool isBumpedToBody();
+};
+
+#endif
