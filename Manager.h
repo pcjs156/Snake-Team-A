@@ -108,12 +108,14 @@ public:
         }
         // 맵 파일 속 초기 Snake 위치/인스턴스 초기화
         int initSnakeX, initSnakeY;
-        for (int i = 0; i < SIZE_Y; i++){
-            for (int j = 0; j < SIZE_X; j++){
+        for (int i = 0; i < SIZE_Y; i++)
+        {
+            for (int j = 0; j < SIZE_X; j++)
+            {
                 if (mapCodes[i][j] == INIT_SNAKE_HEAD_CODE)
                 {
-                    initSnakeY = i+1;
-                    initSnakeX = j+1;
+                    initSnakeY = i + 1;
+                    initSnakeX = j + 1;
                     mapCodes[i][j] = 0; // 초기화에만 Snake Head 정보가 필요하므로 Empty로 놓음
                 }
             }
