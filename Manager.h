@@ -39,7 +39,6 @@ private:
     // Snake를 가리키고 있음 -> 매 스테이지가 끝날 때마다 새로 갱신해주어야 함
     // Constructor에서 다시 instance를 만들어 제대로 초기화해줌
     Snake snake;
-
     // 현재 생성된 아이템의 개수를 기록하는 변수
     int growthCnt;
     int poisonCnt;
@@ -56,7 +55,7 @@ private:
 
 public:
     // filename을 입력받아 맵을 초기화함
-    Manager(int stageNumber) : STAGE_NUM(stageNumber), snake(3, 3)
+    Manager(int stageNumber) : STAGE_NUM(stageNumber)
     {
         // 맵 정보를 담을 2차원 배열을 동적 할당함
         mapCodes = new int *[SIZE_Y];
@@ -107,19 +106,22 @@ public:
                 }
             }
         }
-
-        // Snake 위치/인스턴스 초기화
+        // 맵 파일 속 초기 Snake 위치/인스턴스 초기화
         int initSnakeX, initSnakeY;
-        for (int i = 0; i < SIZE_Y; i++)
-            for (int j = 0; j < SIZE_X; j++)
+        for (int i = 0; i < SIZE_Y; i++){
+            for (int j = 0; j < SIZE_X; j++){
                 if (mapCodes[i][j] == INIT_SNAKE_HEAD_CODE)
                 {
-                    initSnakeY = i;
-                    initSnakeX = j;
+                    initSnakeY = i+1;
+                    initSnakeX = j+1;
                     mapCodes[i][j] = 0; // 초기화에만 Snake Head 정보가 필요하므로 Empty로 놓음
                 }
+            }
+        }
+        //스테이지 초기 Snake 몸통의 좌표값을 설정
+        Snake temp(initSnakeX, initSnakeY);
+        snake = temp;
     }
-
     ~Manager()
     {
         // 맵 정보를 담은 동적 배열 해제
@@ -141,31 +143,30 @@ public:
     {
         return mapStatus;
     }
-
     /* Snake 인스턴스를 반환 */
     Snake getSnake() const { return snake; }
 
-    /* Growth를 생성하는 메서드 
-       Growth가 생성되어 있다면 Growth를 생성하지 않고 false를 반환한다. 
+    /* Growth를 생성하는 메서드
+       Growth가 생성되어 있다면 Growth를 생성하지 않고 false를 반환한다.
        Growth가 생성되어 있지 않다면 Growth를 생성하고 true를 반환한다. */
     bool createGrowth();
 
-    /* Growth를 삭제하는 메서드 
-    Growth가 생성되어 있다면 Growth 자리를 nullptr로 두고 좌표를 -1로 변경한 뒤 true를 반환한다. 
+    /* Growth를 삭제하는 메서드
+    Growth가 생성되어 있다면 Growth 자리를 nullptr로 두고 좌표를 -1로 변경한 뒤 true를 반환한다.
     Growth가 생성되어 있지 않다면 false를 반환한다. */
     bool removeGrowth();
 
-    /* Poison을 생성하는 메서드 
-       Poison이 생성되어 있다면 Poison을 생성하지 않고 false를 반환한다. 
+    /* Poison을 생성하는 메서드
+       Poison이 생성되어 있다면 Poison을 생성하지 않고 false를 반환한다.
        Poison이 생성되어 있지 않다면 Poison를 생성하고 true를 반환한다. */
     bool createPoison();
 
-    /* Poison을 삭제하는 메서드 
-    Poison이 생성되어 있다면 Poison 자리를 nullptr로 두고 좌표를 -1로 변경한 뒤 true를 반환한다. 
+    /* Poison을 삭제하는 메서드
+    Poison이 생성되어 있다면 Poison 자리를 nullptr로 두고 좌표를 -1로 변경한 뒤 true를 반환한다.
     Poison이 생성되어 있지 않다면 false를 반환한다. */
     bool removePoison();
 
-    /* 게이트를 생성하는 메서드 
+    /* 게이트를 생성하는 메서드
        게이트가 생성되어 있거나 게이트를 통과하고 있는 경우 false를 반환하고,
        게이트가 생성되어 있지 않은 경우 게이트를 생성한 후 true를 반환함*/
     bool createGate();
