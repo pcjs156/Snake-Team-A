@@ -20,14 +20,21 @@ public:
     Pos() {}
 
     Pos(int x, int y) : x(x), y(y) {}
+
+    //=연산자
+    Pos &operator=(const Pos &s){
+      this->x = s.x;
+      this->y = s.y;
+      return *this;
+    }
 };
 
 /* 방향을 표시하기 위한 클래스. 좌표와 심볼로 표현할 수 있음. */
 class Direction
 {
 private:
-    const int x;
-    const int y;
+    int x;
+    int y;
 
 public:
     Direction() : x(0), y(0) {}
@@ -73,6 +80,17 @@ public:
         else
             return 'X';
     }
+    //해당 객체의 방향을 변경
+    void set_direction(int x, int y){
+      this->x = x;
+      this->y = y;
+    }
+    Direction &operator=(const Direction &s){
+      this->x = s.x;
+      this->y = s.y;
+      return *this;
+    }
+
 };
 
 /* Snake를 구성하는 몸통(+머리) */
@@ -105,18 +123,38 @@ public:
        수행 결과에 따라 다음의 값을 반환한다.
        true: 정상 수행
        false: scheduleQueue가 비어 있는 경우 */
-    bool update()
+    bool current_update()
     {
         if (scheduleQueue.size() == 0)
             return false;
-
         // 현재 위치 갱신
         currentPos = scheduleQueue[0];
         // 맨 앞의 스케줄 삭제
         scheduleQueue.erase(scheduleQueue.begin());
-
         return true;
     }
+    //snake head 방향에 따라 snake head의 이동 스케줄을 새롭게 추가한다.
+    void head_schedule_update(char symbol){
+      if (symbol == 'L'){
+        scheduleQueue.push_back(Pos(currentPos.x-1, currentPos.y));
+      }
+      else if (symbol == 'R'){
+        scheduleQueue.push_back(Pos(currentPos.x+1, currentPos.y));
+      }
+      else if (symbol == 'U'){
+        scheduleQueue.push_back(Pos(currentPos.x, currentPos.y-1));
+      }
+      else if (symbol == 'D'){
+        scheduleQueue.push_back(Pos(currentPos.x, currentPos.y+1));
+      }
+    }
+    //snake head를 제외한 나머지 몸통의 이동 스케줄을 새롭게 추가한다
+    void schedule_update(Pos next_pos){
+      scheduleQueue.push_back(next_pos);
+    }
+    //snake 몸통의 현재 좌표를 반환
+    int get_currentx(){return currentPos.x;}
+    int get_currenty(){return currentPos.y;}
 };
 
 /* Snake의 상태를 저장/갱신하기 위한 클래스 */
@@ -135,6 +173,7 @@ private:
     int initX, initY;
 
 public:
+  Snake(){}
     // Constructor
     Snake(int initX, int initY)
     {
@@ -150,7 +189,7 @@ public:
         gateCnt = 0;
 
         // 왼쪽 방향을 기본 방향으로 함
-        Direction lastDirection = Direction::getDirectionBySymbol('L');
+        lastDirection = Direction::getDirectionBySymbol('L');
 
         // 맨 처음에는 ">~~" 이렇게 왼쪽을 보고 움직이도록 설정
         bodies.push_back(Body(initX, initY, initX - 1, initY));
@@ -172,7 +211,7 @@ public:
         gateCnt = 0;
 
         // 왼쪽 방향을 기본 방향으로 함
-        Direction lastDirection = Direction::getDirectionBySymbol('L');
+        lastDirection = Direction::getDirectionBySymbol('L');
 
         // 맨 처음에는 ">~~" 이렇게 왼쪽을 보고 움직이도록 설정
         bodies.push_back(Body(initX, initY, initX - 1, initY));
@@ -188,6 +227,7 @@ public:
     int getPoisonCnt() { return poisonCnt; }
     int getGateCnt() { return gateCnt; }
     vector<Body> getBodies() { return bodies; }
+    Direction getlastdirection(){return lastDirection;}
     /* body의 맨 앞 레퍼런스를 반환함
        Precondition: bodies가 비어 있으면 안됨 */
     Body getHead();
@@ -220,10 +260,113 @@ public:
        만약 newDirection이 lastDirection과 반대 방향이라면, false를 반환해 게임을 종료할 수 있도록 하고
        그렇지 않은 경우 true를 반환하여 메서드가 제대로 실행 되었음을 외부에 알림
        단, 아이템이나 벽 충돌, 몸통 충돌 등으로 인한 게임 종료는 함수 외부에서 판단함 */
-    bool moveTo(Direction newDirection);
+
+    //snake의 lastDirection을 newDirection 방향으로 갱신함
+    bool change_head_direction(Direction newDirection){
+      char symbol = this->lastDirection.getSymbol();
+      if(symbol == 'L'){
+        //newDirection 방향이 기존 방향과 반대될 때
+        if(newDirection.getSymbol() == 'R')
+          return false;
+        //newDirection 방향이 반대 방향은 제외한 기존 방향과 다를 때
+        else if (newDirection.getSymbol() != 'X'){
+          this->lastDirection = newDirection;
+          return true;
+        }
+        //newDirection 방향이 기존 방향과 동일할 때
+        else{
+          return true;
+        }
+      }
+      if(symbol == 'R'){
+        if(newDirection.getSymbol() == 'L')
+          return false;
+        else if (newDirection.getSymbol() != 'X'){
+          this->lastDirection = newDirection;
+          return true;
+        }
+        else{
+          return true;
+        }
+      }
+      if(symbol == 'U'){
+        if(newDirection.getSymbol() == 'D')
+          return false;
+        else if (newDirection.getSymbol() != 'X'){
+          this->lastDirection = newDirection;
+          return true;
+        }
+        else{
+          return true;
+        }
+      }
+      if(symbol == 'D'){
+        if(newDirection.getSymbol() == 'U')
+          return false;
+        else if (newDirection.getSymbol() != 'X'){
+          this->lastDirection = newDirection;
+          return true;
+        }
+        else{
+          return true;
+        }
+      }
+    }
+    //snake의 몸통 이동 데이터 갱신
+    bool moveTo(){
+      char symbol = this->lastDirection.getSymbol();
+      if(symbol == 'L'){
+        //snake head의 현재 위치를 다음 위치로 갱신
+        if(bodies[0].current_update()){
+          //snake 방향에 따른 snake head의 이동 스케줄을 새롭게 추가
+          bodies[0].head_schedule_update(symbol);
+          //snake head를 제외한 몸통들의 현재 위치를 다음 위치로 갱신
+          for(int i=1; i<bodies.size(); i++){
+            if(bodies[i].current_update()){
+              //snake head를 제외한 몸통들이 각각 자신의 앞에 있는 몸통의 현재 좌표값을 다음 이동 스케줄에 새롭게 추가
+              bodies[i].schedule_update(Pos(bodies[i-1].get_currentx(), bodies[i-1].get_currenty()));
+            }
+          }
+        }
+        return true;
+      }
+      if(symbol == 'R'){
+        if(bodies[0].current_update()){
+          bodies[0].head_schedule_update(symbol);
+          for(int i=1; i<bodies.size(); i++){
+            if(bodies[i].current_update()){
+              bodies[i].schedule_update(Pos(bodies[i-1].get_currentx(), bodies[i-1].get_currenty()));
+            }
+          }
+        }
+        return true;
+      }
+      if(symbol == 'U'){
+        if(bodies[0].current_update()){
+          bodies[0].head_schedule_update(symbol);
+          for(int i=1; i<bodies.size(); i++){
+            if(bodies[i].current_update()){
+              bodies[i].schedule_update(Pos(bodies[i-1].get_currentx(), bodies[i-1].get_currenty()));
+            }
+          }
+        }
+        return true;
+      }
+      if(symbol == 'D'){
+        if(bodies[0].current_update()){
+          bodies[0].head_schedule_update(symbol);
+          for(int i=1; i<bodies.size(); i++){
+            if(bodies[i].current_update()){
+              bodies[i].schedule_update(Pos(bodies[i-1].get_currentx(), bodies[i-1].get_currenty()));
+            }
+          }
+        }
+        return true;
+      }
+    }
 
     // MapInfo와의 상호작용 ==================================
-    /* 게임 매니저와 상호작용하여 현재 벽에 부딪힌 상태인지(머리가 벽과 겹쳐 있는지) 확인하는 메서드 
+    /* 게임 매니저와 상호작용하여 현재 벽에 부딪힌 상태인지(머리가 벽과 겹쳐 있는지) 확인하는 메서드
        벽에 부딪힌 상태라면 true, 그렇지 않다면 false를 반환함 */
     bool isBumpedToWall(Manager &m);
 
