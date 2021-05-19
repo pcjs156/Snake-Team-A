@@ -224,6 +224,26 @@ int main()
       //이하 데이터 갱신===============================================================
       //snake의 몸통 이동 데이터 갱신
       snake.moveTo();
+      //이상 데이터 갱신===============================================================
+
+      // 상태 점검===================================================================
+      //벽 부딪침 확인
+      /* 게임 매니저와 상호작용하여 현재 벽에 부딪힌 상태인지(머리가 벽과 겹쳐 있는지) 확인하는 메서드
+        벽에 부딪힌 상태라면 게임오버를 반환함
+        (snake.h에서 구현을 하였으나 'Invalid use of incomplete type'가 발생하였고, 오류를 해결할 방법을 찾지 못해
+        일단 여기서 구현을 하였습니다ㅜㅜ)*/
+      int **map = manager.getMapCodes();
+      vector<Body> bodies(snake.getBodies());
+      for(int i=0; i<BOARD_SIZE_Y; i++){
+        for(int j=0; j<BOARD_SIZE_X; j++){
+          if((map[i][j] == 1)&&(bodies[0].get_currentx()==j+1)&&(bodies[0].get_currenty()==i+1)){
+            isGameOver = true;
+          }
+        }
+      }
+      //몸체 부딪침 확인
+      if(snake.isBumpedToBody())
+        isGameOver = true;
       // 이하 렌더링 =================================================================
       // 게임 보드 렌더링
       for (int i = 0; i < BOARD_SIZE_Y; i++)
@@ -231,7 +251,6 @@ int main()
           mvwprintw(gameWindow, i + 1, j + 1, mapStatus[i][j].getSymbol().c_str());
 
       // Snake 렌더링
-      vector<Body> bodies(snake.getBodies());
       for (int i = 0; i < bodies.size(); i++)
       {
         Pos pos = bodies[i].getPos();

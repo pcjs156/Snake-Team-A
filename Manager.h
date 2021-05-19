@@ -151,38 +151,38 @@ public:
     /* Growth를 생성하는 메서드
        Growth가 생성되어 있다면 Growth를 생성하지 않고 false를 반환한다.
        Growth가 생성되어 있지 않다면 Growth를 생성하고 true를 반환한다. */
-    bool createGrowth();
+    bool createGrowth() {return true;}
 
     /* Growth를 삭제하는 메서드
     Growth가 생성되어 있다면 Growth 자리를 nullptr로 두고 좌표를 -1로 변경한 뒤 true를 반환한다.
     Growth가 생성되어 있지 않다면 false를 반환한다. */
-    bool removeGrowth();
+    bool removeGrowth() {return true;}
 
     /* Poison을 생성하는 메서드
        Poison이 생성되어 있다면 Poison을 생성하지 않고 false를 반환한다.
        Poison이 생성되어 있지 않다면 Poison를 생성하고 true를 반환한다. */
-    bool createPoison();
+    bool createPoison() {return true;}
 
     /* Poison을 삭제하는 메서드
     Poison이 생성되어 있다면 Poison 자리를 nullptr로 두고 좌표를 -1로 변경한 뒤 true를 반환한다.
     Poison이 생성되어 있지 않다면 false를 반환한다. */
-    bool removePoison();
+    bool removePoison() {return true;}
 
     /* 게이트를 생성하는 메서드
        게이트가 생성되어 있거나 게이트를 통과하고 있는 경우 false를 반환하고,
        게이트가 생성되어 있지 않은 경우 게이트를 생성한 후 true를 반환함*/
-    bool createGate();
+    bool createGate() {return true;}
 
     /* 게이트를 삭제하는 메서드
        게이트가 생성되어 있거나 게이트를 통과하고 있는 경우 false를 반환하고,
        게이트가 생성되어 있지 않은 경우 게이트를 생성한 후 true를 반환함*/
-    bool removeGate();
+    bool removeGate() {return true;}
 
     /* Snake Head가 아이템의 좌표와 일치하는지 확인하는 메서드 */
-    bool isAtItem();
+    bool isAtItem() {return true;}
 
     /* Snake Head가 게이트 좌표와 일치하는지 확인하는 메서드 */
-    bool isAtGate();
+    bool isAtGate() {return true;}
 };
 
 #endif

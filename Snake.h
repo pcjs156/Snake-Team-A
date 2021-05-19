@@ -402,16 +402,17 @@ public:
       return true;
     }
   }
-
-  // MapInfo와의 상호작용 ==================================
-  /* 게임 매니저와 상호작용하여 현재 벽에 부딪힌 상태인지(머리가 벽과 겹쳐 있는지) 확인하는 메서드
-       벽에 부딪힌 상태라면 true, 그렇지 않다면 false를 반환함 */
-  bool isBumpedToWall(Manager &m);
-
   // 상태 점검 =============================================
   /* 머리가 자신의 몸통과 부딪혔는지 확인하는 메서드
-       Precondition: moveTo 메서드에 의해 이동이 완전히 끝난 후에 호출해야 함 */
-  bool isBumpedToBody();
+       Precondition: moveTo 메서드에 의해 이동이 완전히 끝난 후에 호출해야 함*/
+  bool isBumpedToBody(){
+    for(int i=1; i<bodies.size(); i++){
+      if((bodies[0].get_currentx()==bodies[i].get_currentx())&&(bodies[0].get_currenty()==bodies[i].get_currenty())){
+        return true;
+      }
+    }
+    return false;
+  }
 };
 
 #endif
