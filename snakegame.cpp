@@ -234,15 +234,18 @@ int main()
         일단 여기서 구현을 하였습니다ㅜㅜ)*/
       int **map = manager.getMapCodes();
       vector<Body> bodies(snake.getBodies());
-      for(int i=0; i<BOARD_SIZE_Y; i++){
-        for(int j=0; j<BOARD_SIZE_X; j++){
-          if((map[i][j] == 1)&&(bodies[0].get_currentx()==j+1)&&(bodies[0].get_currenty()==i+1)){
+      for (int i = 0; i < BOARD_SIZE_Y; i++)
+      {
+        for (int j = 0; j < BOARD_SIZE_X; j++)
+        {
+          if ((map[i][j] == 1) && (bodies[0].get_currentx() == j + 1) && (bodies[0].get_currenty() == i + 1))
+          {
             isGameOver = true;
           }
         }
       }
       //몸체 부딪침 확인
-      if(snake.isBumpedToBody())
+      if (snake.isBumpedToBody())
         isGameOver = true;
       // 이하 렌더링 =================================================================
       // 게임 보드 렌더링
