@@ -3,6 +3,8 @@
 
 /* !!! Gate, Item쪽 구현은 Snake쪽 틀이 좀 잡힌 다음 구체화하는게 좋을 것 같음. 변경 가능성 높음. !!!*/
 #include <fstream>
+#include <cstdlib>
+#include <ctime>
 #include "Snake.h"
 #include "Objects.h"
 
@@ -40,10 +42,16 @@ private:
     // Constructor에서 다시 instance를 만들어 제대로 초기화해줌
     Snake snake;
     // 현재 생성된 아이템의 개수를 기록하는 변수
-    int growthCnt;
-    int poisonCnt;
-    vector<Item> items();
-
+    int growthCnt = 0;
+    int poisonCnt = 0;
+    //현재 생성된 아이템의 좌표를 기록하는 변수
+    int growth_item_x = 0;
+    int growth_item_y = 0;
+    int poison_item_x = 0;
+    int poison_item_y = 0;
+    //생성된 아이템의 시각을 기록하는 변수
+    time_t init_growth;
+    time_t init_poison;
     // 현재 게이트가 생성되어 있는지 여부를 기록하는 변수
     bool isGateCreated;
     // 게이트가 열려 있는지(뱀이 통과하는 중인지) 기록하는 변수
@@ -151,22 +159,91 @@ public:
     /* Growth를 생성하는 메서드
        Growth가 생성되어 있다면 Growth를 생성하지 않고 false를 반환한다.
        Growth가 생성되어 있지 않다면 Growth를 생성하고 true를 반환한다. */
-    bool createGrowth() {return true;}
-
+    bool createGrowth(){
+      if(growthCnt == 1){
+        return false;
+      }
+      else{
+        Growth growth_item;
+        init_growth = growth_item.time_check();
+        srand((unsigned int)time(NULL));
+        while(mapCodes[growth_item_y][growth_item_x] != 0){
+          growth_item_y = rand() % 26;
+          growth_item_x = rand() % 56;
+        }
+        mapStatus[growth_item_y][growth_item_x] = growth_item;
+        mapCodes[growth_item_y][growth_item_x] = 4;
+        growthCnt = 1;
+      }
+    }
     /* Growth를 삭제하는 메서드
     Growth가 생성되어 있다면 Growth 자리를 nullptr로 두고 좌표를 -1로 변경한 뒤 true를 반환한다.
     Growth가 생성되어 있지 않다면 false를 반환한다. */
-    bool removeGrowth() {return true;}
-
+    bool removeGrowth(int check){
+      time_t end = time(NULL);
+      if((check == 0)&&(growthCnt == 1)&&(end - init_growth > 5)){
+        mapStatus[growth_item_y][growth_item_x] = Empty();
+        mapCodes[growth_item_y][growth_item_x] = 0;
+        growthCnt = 0;
+        growth_item_y = 0;
+        growth_item_x = 0;
+        return true;
+      }
+      else if(check == 1){
+        mapStatus[growth_item_y][growth_item_x] = Empty();
+        mapCodes[growth_item_y][growth_item_x] = 0;
+        growthCnt = 0;
+        growth_item_y = 0;
+        growth_item_x = 0;
+        return true;
+      }
+      else
+        return false;
+    }
     /* Poison을 생성하는 메서드
        Poison이 생성되어 있다면 Poison을 생성하지 않고 false를 반환한다.
        Poison이 생성되어 있지 않다면 Poison를 생성하고 true를 반환한다. */
-    bool createPoison() {return true;}
-
+    bool createPoison(){
+      if(poisonCnt == 1){
+        return false;
+      }
+      else{
+        Poison poison_item;
+        init_poison = poison_item.time_check();
+        srand((unsigned int)time(NULL));
+        while(mapCodes[poison_item_y][poison_item_x] != 0){
+          poison_item_y = rand() % 26;
+          poison_item_x = rand() % 56;
+        }
+        mapStatus[poison_item_y][poison_item_x] = poison_item;
+        mapCodes[poison_item_y][poison_item_x] = 5;
+        poisonCnt = 1;
+      }
+    }
     /* Poison을 삭제하는 메서드
     Poison이 생성되어 있다면 Poison 자리를 nullptr로 두고 좌표를 -1로 변경한 뒤 true를 반환한다.
     Poison이 생성되어 있지 않다면 false를 반환한다. */
-    bool removePoison() {return true;}
+    bool removePoison(int check){
+      time_t end = time(NULL);
+      if((check == 0)&&(poisonCnt == 1)&&(end - init_poison > 5)){
+        mapStatus[poison_item_y][poison_item_x] = Empty();
+        mapCodes[poison_item_y][poison_item_x] = 0;
+        poisonCnt = 0;
+        poison_item_y = 0;
+        poison_item_x = 0;
+        return true;
+      }
+      else if(check == 1){
+        mapStatus[poison_item_y][poison_item_x] = Empty();
+        mapCodes[poison_item_y][poison_item_x] = 0;
+        poisonCnt = 0;
+        poison_item_y = 0;
+        poison_item_x = 0;
+        return true;
+      }
+      else
+        return false;
+    }
 
     /* 게이트를 생성하는 메서드
        게이트가 생성되어 있거나 게이트를 통과하고 있는 경우 false를 반환하고,
@@ -178,8 +255,37 @@ public:
        게이트가 생성되어 있지 않은 경우 게이트를 생성한 후 true를 반환함*/
     bool removeGate() {return true;}
 
-    /* Snake Head가 아이템의 좌표와 일치하는지 확인하는 메서드 */
-    bool isAtItem() {return true;}
+    /* Snake Head가 아이템의 좌표와 일치하는지 확인하고 사용하는 메서드
+      (Snake.h에 있던 useItem() 함수 기능을 합쳤습니다!)*/
+    bool useItem(Snake &s){
+      Body snake_head = s.getHead();
+      for(int i=0; i<SIZE_Y; i++){
+        for(int j=0; j<SIZE_X; j++){
+          if((mapCodes[i][j] == 4)&&(snake_head.get_currentx()==j+1)&&(snake_head.get_currenty()==i+1)){
+            s.lengthen();
+            int use_growth = s.getGrowthCnt();
+            s.setGrowhCnt(use_growth+1);
+            removeGrowth(1);
+            return true;
+          }
+          else if((mapCodes[i][j] == 5)&&(snake_head.get_currentx()==j+1)&&(snake_head.get_currenty()==i+1)){
+            if(s.shorten()){
+              int use_poison = s.getPoisonCnt();
+              s.setPoisonCnt(use_poison+1);
+              removePoison(1);
+              return true;
+            }
+            else{
+              int use_poison = s.getPoisonCnt();
+              s.setPoisonCnt(use_poison+1);
+              removePoison(1);
+              return false;
+            }
+          }
+        }
+      }
+      return true;
+    }
 
     /* Snake Head가 게이트 좌표와 일치하는지 확인하는 메서드 */
     bool isAtGate() {return true;}

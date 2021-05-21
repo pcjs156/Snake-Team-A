@@ -238,9 +238,13 @@ public:
   Direction getlastdirection() { return lastDirection; }
   /* body의 맨 앞 레퍼런스를 반환함
        Precondition: bodies가 비어 있으면 안됨 */
-  Body getHead();
+  Body getHead(){
+    return bodies[0];
+  }
   /* head의 좌표를 Pos로 반환함 */
-  Pos getHeadPos();
+  Pos getHeadPos(){
+    return bodies[0].getPos();
+  }
 
   // Setter =============================================
   void setLength(int length) { this->length = length; };
@@ -252,14 +256,43 @@ public:
   /* Snake의 길이를 1만큼 줄이는 함수
      길이를 더 줄일 수 없다면(줄이면 뱀이 죽는다면) 길이를 갱신하지 않고 false를 반환
      길이를 더 줄일 수 있다면 길이와 Body 정보를 갱신하고 true를 반환 */
-  bool shorten();
+  bool shorten(){
+    if(length == MIN_LENGTH)
+      return false;
+    else{
+      length -= 1;
+      bodies.pop_back();
+      return true;
+    }
+  }
   /* Snake의 길이를 1만큼 늘이고 Body 정보를 갱신하는 함수
      몸 길이의 상한선이 없으므로 항상 잘 작동하지만, 일관성을 위해 항상 true를 반환 */
-  bool lengthen(Direction newDirection);
+  bool lengthen(){
+    char symbol = this->lastDirection.getSymbol();
+    if(symbol == 'L'){
+      bodies.push_back(Body(bodies[length-1].get_currentx()+1, bodies[length-1].get_currenty(), bodies[length-1].get_currentx(), bodies[length-1].get_currenty()));
+      length += 1;
+      return true;
+    }
+    if(symbol == 'R'){
+      bodies.push_back(Body(bodies[length-1].get_currentx()-1, bodies[length-1].get_currenty(), bodies[length-1].get_currentx(), bodies[length-1].get_currenty()));
+      length += 1;
+      return true;
+    }
+    if(symbol == 'U'){
+      bodies.push_back(Body(bodies[length-1].get_currentx(), bodies[length-1].get_currenty()+1, bodies[length-1].get_currentx(), bodies[length-1].get_currenty()));
+      length += 1;
+      return true;
+    }
+    if(symbol == 'D'){
+      bodies.push_back(Body(bodies[length-1].get_currentx(), bodies[length-1].get_currenty()-1, bodies[length-1].get_currentx(), bodies[length-1].get_currenty()));
+      length += 1;
+      return true;
+    }
+
+  }
 
   // 아이템 관련 =========================================
-  /* 함수 내부에서 item.affect(*this)를 수행해 snake의 상태를 갱신하고, 게임 종료 여부를 판단함 */
-  bool useItem(Manager &m, Item &item);
   /* 게이트를 사용해 Body의 위치와 이동 경로를 수정함. 일관성을 위해 항상 true를 반환하도록 설정 */
   bool useGate(Manager &m, Direction direction);
 
