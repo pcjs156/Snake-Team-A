@@ -1,7 +1,7 @@
 /*************************************
  * 게임 시작 entry point 메인함수
  * 게임 로직과 화면 제어를 수행한다.
-**************************************/
+***************************************/
 #include <clocale>
 #include <ncurses.h>
 #include <iostream>
@@ -234,18 +234,15 @@ int main()
         일단 여기서 구현을 하였습니다ㅜㅜ)*/
       int **map = manager.getMapCodes();
       vector<Body> bodies(snake.getBodies());
-      for (int i = 0; i < BOARD_SIZE_Y; i++)
-      {
-        for (int j = 0; j < BOARD_SIZE_X; j++)
-        {
-          if ((map[i][j] == 1) && (bodies[0].get_currentx() == j + 1) && (bodies[0].get_currenty() == i + 1))
-          {
+      for(int i=0; i<BOARD_SIZE_Y; i++){
+        for(int j=0; j<BOARD_SIZE_X; j++){
+          if((map[i][j] == 1)&&(bodies[0].get_currentx()==j+1)&&(bodies[0].get_currenty()==i+1)){
             isGameOver = true;
           }
         }
       }
       //몸체 부딪침 확인
-      if (snake.isBumpedToBody())
+      if(snake.isBumpedToBody())
         isGameOver = true;
       //벽과 지렁이가 있는 곳이 아닌 지점에 아이템 랜덤생성
       manager.createGrowth();
@@ -259,7 +256,7 @@ int main()
       //다시 아이템 랜덤 생성
       manager.createGrowth();
       manager.createPoison();
-      
+
       // 이하 렌더링 =================================================================
       // 게임 보드 렌더링
       for (int i = 0; i < BOARD_SIZE_Y; i++)
