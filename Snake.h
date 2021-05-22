@@ -81,6 +81,15 @@ public:
     else
       return 'X';
   }
+  // 전달된 방향이 해당 객체의 방향과 반대 방향이면 true, 아니면 false를 반환
+  bool isOpposite(Direction d)
+  {
+    char foeSymbol = d.getSymbol();
+    char currSymbol = getSymbol();
+
+    return ((foeSymbol == 'L') && (foeSymbol == 'R')) || ((foeSymbol == 'R') && (foeSymbol == 'L')) ||
+           ((foeSymbol == 'U') && (foeSymbol == 'D')) || ((foeSymbol == 'D') && (foeSymbol == 'U'));
+  }
   //해당 객체의 방향을 변경
   void set_direction(int x, int y)
   {
@@ -238,11 +247,13 @@ public:
   Direction getlastdirection() { return lastDirection; }
   /* body의 맨 앞 레퍼런스를 반환함
        Precondition: bodies가 비어 있으면 안됨 */
-  Body getHead(){
+  Body getHead()
+  {
     return bodies[0];
   }
   /* head의 좌표를 Pos로 반환함 */
-  Pos getHeadPos(){
+  Pos getHeadPos()
+  {
     return bodies[0].getPos();
   }
 
@@ -256,10 +267,12 @@ public:
   /* Snake의 길이를 1만큼 줄이는 함수
      길이를 더 줄일 수 없다면(줄이면 뱀이 죽는다면) 길이를 갱신하지 않고 false를 반환
      길이를 더 줄일 수 있다면 길이와 Body 정보를 갱신하고 true를 반환 */
-  bool shorten(){
-    if(length == MIN_LENGTH)
+  bool shorten()
+  {
+    if (length == MIN_LENGTH)
       return false;
-    else{
+    else
+    {
       length -= 1;
       bodies.pop_back();
       return true;
@@ -267,29 +280,33 @@ public:
   }
   /* Snake의 길이를 1만큼 늘이고 Body 정보를 갱신하는 함수
      몸 길이의 상한선이 없으므로 항상 잘 작동하지만, 일관성을 위해 항상 true를 반환 */
-  bool lengthen(){
+  bool lengthen()
+  {
     char symbol = this->lastDirection.getSymbol();
-    if(symbol == 'L'){
-      bodies.push_back(Body(bodies[length-1].get_currentx()+1, bodies[length-1].get_currenty(), bodies[length-1].get_currentx(), bodies[length-1].get_currenty()));
+    if (symbol == 'L')
+    {
+      bodies.push_back(Body(bodies[length - 1].get_currentx() + 1, bodies[length - 1].get_currenty(), bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty()));
       length += 1;
       return true;
     }
-    if(symbol == 'R'){
-      bodies.push_back(Body(bodies[length-1].get_currentx()-1, bodies[length-1].get_currenty(), bodies[length-1].get_currentx(), bodies[length-1].get_currenty()));
+    if (symbol == 'R')
+    {
+      bodies.push_back(Body(bodies[length - 1].get_currentx() - 1, bodies[length - 1].get_currenty(), bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty()));
       length += 1;
       return true;
     }
-    if(symbol == 'U'){
-      bodies.push_back(Body(bodies[length-1].get_currentx(), bodies[length-1].get_currenty()+1, bodies[length-1].get_currentx(), bodies[length-1].get_currenty()));
+    if (symbol == 'U')
+    {
+      bodies.push_back(Body(bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty() + 1, bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty()));
       length += 1;
       return true;
     }
-    if(symbol == 'D'){
-      bodies.push_back(Body(bodies[length-1].get_currentx(), bodies[length-1].get_currenty()-1, bodies[length-1].get_currentx(), bodies[length-1].get_currenty()));
+    if (symbol == 'D')
+    {
+      bodies.push_back(Body(bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty() - 1, bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty()));
       length += 1;
       return true;
     }
-
   }
 
   // 아이템 관련 =========================================
@@ -305,65 +322,21 @@ public:
   //snake의 lastDirection을 newDirection 방향으로 갱신함
   bool change_head_direction(Direction newDirection)
   {
-    char symbol = this->lastDirection.getSymbol();
-    if (symbol == 'L')
+    //newDirection 방향이 기존 방향과 반대될 때
+    if (this->lastDirection.isOpposite(newDirection))
     {
-      //newDirection 방향이 기존 방향과 반대될 때
-      if (newDirection.getSymbol() == 'R')
-        return false;
-      //newDirection 방향이 반대 방향은 제외한 기존 방향과 다를 때
-      else if (newDirection.getSymbol() != 'X')
-      {
-        this->lastDirection = newDirection;
-        return true;
-      }
-      //newDirection 방향이 기존 방향과 동일할 때
-      else
-      {
-        return true;
-      }
+      return false;
     }
-    if (symbol == 'R')
+    //newDirection 방향이 반대 방향은 제외한 기존 방향과 다를 때
+    else if (newDirection.getSymbol() != 'X')
     {
-      if (newDirection.getSymbol() == 'L')
-        return false;
-      else if (newDirection.getSymbol() != 'X')
-      {
-        this->lastDirection = newDirection;
-        return true;
-      }
-      else
-      {
-        return true;
-      }
+      this->lastDirection = newDirection;
+      return true;
     }
-    if (symbol == 'U')
+    //newDirection 방향이 기존 방향과 동일할 때
+    else
     {
-      if (newDirection.getSymbol() == 'D')
-        return false;
-      else if (newDirection.getSymbol() != 'X')
-      {
-        this->lastDirection = newDirection;
-        return true;
-      }
-      else
-      {
-        return true;
-      }
-    }
-    if (symbol == 'D')
-    {
-      if (newDirection.getSymbol() == 'U')
-        return false;
-      else if (newDirection.getSymbol() != 'X')
-      {
-        this->lastDirection = newDirection;
-        return true;
-      }
-      else
-      {
-        return true;
-      }
+      return true;
     }
   }
   //snake의 몸통 이동 데이터 갱신
@@ -438,9 +411,12 @@ public:
   // 상태 점검 =============================================
   /* 머리가 자신의 몸통과 부딪혔는지 확인하는 메서드
        Precondition: moveTo 메서드에 의해 이동이 완전히 끝난 후에 호출해야 함*/
-  bool isBumpedToBody(){
-    for(int i=1; i<bodies.size(); i++){
-      if((bodies[0].get_currentx()==bodies[i].get_currentx())&&(bodies[0].get_currenty()==bodies[i].get_currenty())){
+  bool isBumpedToBody()
+  {
+    for (int i = 1; i < bodies.size(); i++)
+    {
+      if ((bodies[0].get_currentx() == bodies[i].get_currentx()) && (bodies[0].get_currenty() == bodies[i].get_currenty()))
+      {
         return true;
       }
     }
