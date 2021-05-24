@@ -85,8 +85,9 @@ public:
     {
         symbol = "+";
     }
-    time_t time_check(){
-      return CREATED_TIME;
+    time_t time_check()
+    {
+        return CREATED_TIME;
     }
 };
 
@@ -98,8 +99,9 @@ public:
 
         symbol = "-";
     }
-    time_t time_check(){
-      return CREATED_TIME;
+    time_t time_check()
+    {
+        return CREATED_TIME;
     }
 };
 
