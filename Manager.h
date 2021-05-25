@@ -389,26 +389,27 @@ public:
       s.setLastDirection(outDirection);
 
       // 나가는 게이트의 진출 방향으로 head의 위치를 바꿔줌
-      int outX = gateExitX - outDirection.getXDirection();
-      int outY = gateExitY - outDirection.getYDirection();
+      // int outX = gateExitX - outDirection.getXDirection();
+      // int outY = gateExitY - outDirection.getYDirection();
+
+      int outX = gateExitX;
+      int outY = gateExitY;
 
       switch (symbolExitGateAtEdge)
       {
       case 'L':
-        outX += 3;
+        outX += 2;
         outY += 1;
         break;
       case 'R':
-        outX -= 1;
         outY += 1;
         break;
       case 'U':
         outX += 1;
-        outY += 3;
+        outY += 2;
         break;
       case 'D':
         outX += 1;
-        outY -= 1;
         break;
       }
 
