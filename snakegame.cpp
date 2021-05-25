@@ -234,21 +234,24 @@ int main()
         일단 여기서 구현을 하였습니다ㅜㅜ)*/
       int **map = manager.getMapCodes();
       vector<Body> bodies(snake.getBodies());
-      for(int i=0; i<BOARD_SIZE_Y; i++){
-        for(int j=0; j<BOARD_SIZE_X; j++){
-          if((map[i][j] == 1)&&(bodies[0].get_currentx()==j+1)&&(bodies[0].get_currenty()==i+1)){
+      for (int i = 0; i < BOARD_SIZE_Y; i++)
+      {
+        for (int j = 0; j < BOARD_SIZE_X; j++)
+        {
+          if ((map[i][j] == 1) && (bodies[0].get_currentx() == j + 1) && (bodies[0].get_currenty() == i + 1))
+          {
             isGameOver = true;
           }
         }
       }
       //몸체 부딪침 확인
-      if(snake.isBumpedToBody())
+      if (snake.isBumpedToBody())
         isGameOver = true;
       //벽과 지렁이가 있는 곳이 아닌 지점에 아이템 랜덤생성
       manager.createGrowth();
       manager.createPoison();
       //아이템과 snake가 접촉하였는지 확인 및 아이템 사용 후, snake 길이가 3보다 짧아질 경우
-      if(manager.useItem(snake) == false)
+      if (manager.useItem(snake) == false)
         isGameOver = true;
       //아이템 사용을 하지 않았고 생성된지 5초가 경과되었을 경우 아이템 삭제
       manager.removeGrowth(0);
@@ -256,6 +259,29 @@ int main()
       //다시 아이템 랜덤 생성
       manager.createGrowth();
       manager.createPoison();
+
+      // 게이트 생성
+      manager.createGate();
+      // 만약 게이트에 접촉했다면(게이트와 헤드가 겹친다면),
+      // snake의 위치와 스케줄을 갱신함
+      if (manager.isHeadAtGate(snake))
+      {
+        cout << "\n\n\nHEAD!" << endl;
+        manager.turnOnGate();
+      }
+      // 게이트가 활성되어 있는 경우, 게이트 진입점에 꼬리가 도달했는지 확인
+      if (manager.isTailAtEntranceGate(snake))
+      {
+        cout << "\n\nTAIL!" << endl;
+        manager.removeGate();
+      }
+      // // 만약 게이트가 활성화 되어 있지 않은 상태라면,
+      // // removeGate 내부에서 조건을 검사하고 게이트를 삭제한다.
+      // else
+      // {
+      //   if (!manager.isGateActivated())
+      //     manager.removeGate();
+      // }
 
       // 이하 렌더링 =================================================================
       // 게임 보드 렌더링

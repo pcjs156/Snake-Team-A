@@ -51,9 +51,10 @@ public:
 
 class Gate : public Wall
 {
+public:
     Gate()
     {
-        symbol = "@";
+        symbol = "X";
     }
 };
 
@@ -85,8 +86,9 @@ public:
     {
         symbol = "+";
     }
-    time_t time_check(){
-      return CREATED_TIME;
+    time_t time_check()
+    {
+        return CREATED_TIME;
     }
 };
 
@@ -98,8 +100,9 @@ public:
 
         symbol = "-";
     }
-    time_t time_check(){
-      return CREATED_TIME;
+    time_t time_check()
+    {
+        return CREATED_TIME;
     }
 };
 
