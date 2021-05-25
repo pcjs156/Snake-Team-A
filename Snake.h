@@ -38,6 +38,12 @@ public:
   {
     return !(p1 == p2);
   }
+
+  friend ostream &operator<<(ostream &os, const Pos &p)
+  {
+    cout << "(" << p.x << ", " << p.y << ")";
+    return os;
+  }
 };
 
 /* 방향을 표시하기 위한 클래스. 좌표와 심볼로 표현할 수 있음. */
@@ -218,6 +224,11 @@ public:
   {
     scheduleQueue[scheduleQueue.size() - 1] = p;
   }
+
+  vector<Pos> getSchedule()
+  {
+    return scheduleQueue;
+  }
 };
 
 /* Snake의 상태를 저장/갱신하기 위한 클래스 */
@@ -293,9 +304,9 @@ public:
   Direction getlastdirection() { return lastDirection; }
   /* body의 맨 앞 레퍼런스를 반환함
        Precondition: bodies가 비어 있으면 안됨 */
-  Body getHead()
+  Body *getHead()
   {
-    return bodies[0];
+    return &bodies[0];
   }
   /* head의 좌표를 Pos로 반환함 */
   Pos getHeadPos()
@@ -463,6 +474,7 @@ public:
           }
         }
       }
+
       return true;
     }
     if (symbol == 'R')
@@ -478,6 +490,7 @@ public:
           }
         }
       }
+
       return true;
     }
     if (symbol == 'U')
@@ -493,6 +506,7 @@ public:
           }
         }
       }
+
       return true;
     }
     if (symbol == 'D')
@@ -508,6 +522,7 @@ public:
           }
         }
       }
+
       return true;
     }
   }

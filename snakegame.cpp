@@ -266,13 +266,11 @@ int main()
       // snake의 위치와 스케줄을 갱신함
       if (manager.isHeadAtGate(snake))
       {
-        cout << "\n\n\nHEAD!" << endl;
-        manager.turnOnGate();
+        manager.turnOnGate(snake);
       }
       // 게이트가 활성되어 있는 경우, 게이트 진입점에 꼬리가 도달했는지 확인
       if (manager.isTailAtEntranceGate(snake))
       {
-        cout << "\n\nTAIL!" << endl;
         manager.removeGate();
       }
       // // 만약 게이트가 활성화 되어 있지 않은 상태라면,
@@ -340,7 +338,7 @@ int main()
   delwin(messageWindow);
   endwin();
 
-  cout << time(NULL) - startTime;
+  cout << "PLAY TIME: " << time(NULL) - startTime << "(SEC)" << endl;
 
   return 0;
 }

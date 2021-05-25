@@ -58,6 +58,9 @@ private:
   //생성된 아이템의 시각을 기록하는 변수
   time_t init_growth;
   time_t init_poison;
+  // 아이템의 유지 시간(초)
+  const int GROWTH_DURATION = 60;
+  const int POISON_DURATION = 5;
 
   // 현재 게이트가 생성되어 있는지 여부를 기록하는 변수
   bool isGateCreated = false;
@@ -198,7 +201,7 @@ public:
   bool removeGrowth(int check)
   {
     time_t end = time(NULL);
-    if ((check == 0) && (growthCnt == 1) && (end - init_growth > 5))
+    if ((check == 0) && (growthCnt == 1) && (end - init_growth > GROWTH_DURATION))
     {
       mapStatus[growth_item_y][growth_item_x] = Empty();
       mapCodes[growth_item_y][growth_item_x] = 0;
@@ -251,7 +254,7 @@ public:
   bool removePoison(int check)
   {
     time_t end = time(NULL);
-    if ((check == 0) && (poisonCnt == 1) && (end - init_poison > 5))
+    if ((check == 0) && (poisonCnt == 1) && (end - init_poison > POISON_DURATION))
     {
       mapStatus[poison_item_y][poison_item_x] = Empty();
       mapCodes[poison_item_y][poison_item_x] = 0;
@@ -350,9 +353,9 @@ public:
      Precondition: turnOnGate가 호출되는 시점에 head의 좌표가 반드시 진입 좌표여야 한다.
      만약 !gateActivated라면, false를 반환하고 이외의 경우 true를 반환한다.
      만약 게이트 활성화 횟수가 남아 있지 않다면, isGate */
-  bool turnOnGate()
+  bool turnOnGate(Snake &s)
   {
-    Body head = snake.getHead();
+    Body head = *(s.getHead());
     Pos headPos = head.getPos();
 
     // gateAtivationLeft 기록을 시작함(snake의 몸 길이만큼 게이트 활성화를 유지함)
@@ -361,7 +364,7 @@ public:
 
     // 만약 head가 들어가는 게이트가 이전에 설정해놓은 진입 게이트가 아니라면,
     // 진입 게이트와 출구 게이트를 서로 바꿔 현재 접촉한 게이트가 진입 게이트임을 보장한다.
-    if (headPos != Pos(gateEntranceX, gateEntranceY))
+    if (headPos != Pos(gateEntranceX + 1, gateEntranceY + 1))
     {
       int tmp = gateEntranceX;
       gateEntranceX = gateExitX;
@@ -383,17 +386,33 @@ public:
       Direction outDirection = Direction::getOppositeDirection(symbolExitGateAtEdge);
 
       // 진행 방향을 수정해줌
-      snake.setLastDirection(outDirection);
+      s.setLastDirection(outDirection);
 
       // 나가는 게이트의 진출 방향으로 head의 위치를 바꿔줌
-      int outX = gateExitX + outDirection.getXDirection();
-      int outY = gateExitY + outDirection.getYDirection();
-      snake.setHeadPos(Pos(outX, outY));
+      int outX = gateExitX - outDirection.getXDirection();
+      int outY = gateExitY - outDirection.getYDirection();
 
-      vector<Body> bodies = snake.getBodies();
-      // 몸통의 마지막 스케줄을 현재 업데이트된 head의 좌표로 바꿔줌
-      for (int i = 1; i < snake.getLength(); i++)
-        bodies[i].setLastSchedule(Pos(outX, outY));
+      switch (symbolExitGateAtEdge)
+      {
+      case 'L':
+        outX += 3;
+        outY += 1;
+        break;
+      case 'R':
+        outX -= 1;
+        outY += 1;
+        break;
+      case 'U':
+        outX += 1;
+        outY += 3;
+        break;
+      case 'D':
+        outX += 1;
+        outY -= 1;
+        break;
+      }
+
+      (*(s.getHead())).setLastSchedule(Pos(outX, outY));
     }
     // 경우 2. 출구 게이트가 가장자리에 있지 않을 경우
     else
@@ -404,11 +423,8 @@ public:
   /* Snake Head가 게이트 좌표와 일치하는지 확인하는 메서드 */
   bool isHeadAtGate(Snake &s)
   {
-    Body head = s.getHead();
+    Body head = *(s).getHead();
     Pos headPos = head.getPos();
-    cout << "HEAD (" << headPos.x << ", " << headPos.y << ")\n\n";
-    cout << "EXIT (" << gateExitX + 1 << ", " << gateExitY + 1 << ")\n";
-    cout << "ENTR (" << gateEntranceX + 1 << ", " << gateEntranceY + 1 << ")\n";
 
     return ((headPos == Pos(gateExitX + 1, gateExitY + 1)) || (headPos == Pos(gateEntranceX + 1, gateEntranceY + 1)));
   }
@@ -419,9 +435,7 @@ public:
     Body tail = s.getLastBody();
     Pos tailPos = tail.getPos();
 
-    cout << "TAIL (" << tailPos.x << ", " << tailPos.y << ")\n";
-
-    return (tailPos == Pos(gateEntranceX, gateExitY));
+    return (tailPos == Pos(gateEntranceX + 1, gateEntranceY + 1));
   }
 
   /* 출구 게이트의 좌표가 가장자리인지 확인하는 메서드
@@ -446,7 +460,7 @@ public:
       (Snake.h에 있던 useItem() 함수 기능을 합쳤습니다!)*/
   bool useItem(Snake &s)
   {
-    Body snake_head = s.getHead();
+    Body snake_head = *(s).getHead();
     for (int i = 0; i < SIZE_Y; i++)
     {
       for (int j = 0; j < SIZE_X; j++)
