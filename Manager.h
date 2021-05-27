@@ -69,11 +69,15 @@ private:
   int gateEntranceX, gateEntranceY;
   int gateExitX, gateExitY;
   // 게이트 생성이 시작되는 snake의 길이
-  const int GATE_GENERATE_LEN = 10;
+  const int GATE_GENERATE_LEN = 4;
   // 게이트 유지 시간(초)
-  const int GATE_DURATION_SEC = 10;
+  const int GATE_DURATION_SEC = 30;
+  // 게이트 생성 주기
+  const int GATE_COOLTIME = 10;
   // 게이트가 snake의 위치를 갱신할(snake가 앞으로 위치를 갱신할 수 있는) 횟수
   int gateActivationLeft = 0;
+  // 마지막으로 게이트가 생성된 시각
+  time_t gateGenerated = 0;
 
 public:
   // filename을 입력받아 맵을 초기화함
@@ -285,15 +289,20 @@ public:
   /* 게이트를 생성하는 메서드
     게이트가 생성되어 있거나 게이트를 통과하고 있는 경우 false를 반환하고,
     게이트가 생성되어 있지 않은 경우 게이트를 생성한 후 true를 반환함*/
-  bool createGate()
+  bool createGate(Snake &s)
   {
-    // 이미 게이트가 만들어져 있거나, 기준 길이보다 짧은 경우 게이트를 생성하지 않음
-    if (isGateCreated || snake.getLength() < 1)
+    // 이미 게이트가 만들어져 있거나, 기준 길이보다 짧거나, 게이트가 쿨타임이 돌지 않은 경우 게이트를 생성하지 않음
+    if (isGateCreated || (s.getLength() < GATE_GENERATE_LEN) || (time(NULL) - gateGenerated < GATE_COOLTIME))
     {
       return false;
     }
     else
     {
+      // 게이트 생성 시각 초기화
+      gateGenerated = time(NULL);
+      // 게이트가 생성되었음을 표시
+      isGateCreated = true;
+
       // 벽의 위치 중 랜덤하게 게이트의 위치를 고름
       // 일단 들어가는 게이트와 나오는 게이트의 위치를 고정하되,
       // snake head가 먼저 gate에 접촉하는 쪽을 entrance로 나중에 수정해 주어야 함
@@ -321,26 +330,23 @@ public:
       mapCodes[gateEntranceY][gateEntranceX] = GATE_CODE;
       mapCodes[gateExitY][gateExitX] = GATE_CODE;
 
-      isGateCreated = true;
       return true;
     }
   }
 
+  // 게이트를 통과할 때마다 남은 게이트 활성화 횟수를 줄여줌
   void updateGateActivationLeft()
   {
-    gateActivationLeft = snake.getLength();
+    gateActivationLeft -= 1;
   }
 
   /* 게이트를 삭제하는 메서드
-       게이트가 생성되어 있거나 게이트를 통과하고 있는 경우 false를 반환하고,
-       게이트가 생성되어 있지 않은 경우 게이트를 생성한 후 true를 반환함*/
-  bool removeGate()
+       게이트가 활성화 되어 있거나 유지 시간이 끝난 경우 게이트를 닫음 */
+  void removeGate()
   {
-    if (isGateActivated())
-      return false;
-
-    else
+    if (isGateCreated && (!isGateActivated()) && (time(NULL) - gateGenerated > GATE_DURATION_SEC))
     {
+      isGateCreated = false;
       // 맵에 기록되어 있는 게이트 정보 삭제
       mapCodes[gateEntranceY][gateEntranceX] = WALL_CODE;
       mapStatus[gateEntranceY][gateEntranceX] = Wall();
@@ -359,8 +365,8 @@ public:
     Pos headPos = head.getPos();
 
     // gateAtivationLeft 기록을 시작함(snake의 몸 길이만큼 게이트 활성화를 유지함)
-    // turnOnGate -> 해당 변수 감소 순서대로 수행되므로, 몸 길이만큼 초기화 해주는 것이 맞음.
-    gateActivationLeft = snake.getLength();
+    // turnOnGate -> 해당 변수 감소 순서대로 수행되고, 머리의 위치를 미리 옮겨 놓으므로 몸 길이보다 1 작게 초기화 해주는 것이 맞음.
+    gateActivationLeft = s.getLength() - 1;
 
     // 만약 head가 들어가는 게이트가 이전에 설정해놓은 진입 게이트가 아니라면,
     // 진입 게이트와 출구 게이트를 서로 바꿔 현재 접촉한 게이트가 진입 게이트임을 보장한다.
