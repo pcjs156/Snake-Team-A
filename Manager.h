@@ -69,11 +69,11 @@ private:
   int gateEntranceX, gateEntranceY;
   int gateExitX, gateExitY;
   // 게이트 생성이 시작되는 snake의 길이
-  const int GATE_GENERATE_LEN = 4;
+  const int GATE_GENERATE_LEN = 3;
   // 게이트 유지 시간(초)
-  const int GATE_DURATION_SEC = 30;
+  const int GATE_DURATION_SEC = 60;
   // 게이트 생성 주기
-  const int GATE_COOLTIME = 10;
+  const int GATE_COOLTIME = 2;
   // 게이트가 snake의 위치를 갱신할(snake가 앞으로 위치를 갱신할 수 있는) 횟수
   int gateActivationLeft = 0;
   // 마지막으로 게이트가 생성된 시각
@@ -424,6 +424,38 @@ public:
     // 경우 2. 출구 게이트가 가장자리에 있지 않을 경우
     else
     {
+      // 원래 진출하려던 방향의 상대좌표
+      int directionX = s.getlastdirection().getXDirection();
+      int directionY = s.getlastdirection().getYDirection();
+
+      // 규칙 1. 원래 진출하려던 방향이 뚫려 있는 경우 그대로 진출
+      if (mapCodes[gateExitY + directionY][gateExitX + directionX] == EMPTY_CODE)
+      {
+        int outX = gateExitX + directionX;
+        int outY = gateExitY + directionY;
+
+        switch (s.getlastdirection().getSymbol())
+        {
+        case 'L':
+          outX += 1;
+          outY += 1;
+          break;
+        case 'R':
+          outX += 1;
+          outY += 1;
+          break;
+        case 'U':
+          outX += 1;
+          outY += 1;
+          break;
+        case 'D':
+          outX += 1;
+          outY += 1;
+          break;
+        }
+
+        (*(s.getHead())).setLastSchedule(Pos(outX, outY));
+      }
     }
   }
 
