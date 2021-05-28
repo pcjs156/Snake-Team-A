@@ -73,8 +73,7 @@ public:
       return Direction(0, 1);
     }
 
-    cout << "WARNING: Invalid Direction Symbol '" << symbol << "'\n";
-    cout << "Direction(0, 0) is returned.\n";
+    cout << "ERROR: Invalid Direction Symbol '" << symbol << "'\n";
     return Direction(0, 0);
   }
 
@@ -93,8 +92,7 @@ public:
       return Direction::getDirectionBySymbol('U');
     }
 
-    cout << "WARNING: On getOppositeDirection, Invalid Direction Symbol '" << symbol << "'\n";
-    cout << "Direction(0, 0) is returned.\n";
+    cout << "ERROR: On getOppositeDirection, Invalid Direction Symbol '" << symbol << "'\n";
     return Direction(0, 0);
   }
 
@@ -134,6 +132,52 @@ public:
   int getYDirection()
   {
     return y;
+  }
+
+  // 해당 객체의 시계 방향으로 회전하는 방향을 반환
+  Direction getClockwise()
+  {
+    switch (getSymbol())
+    {
+    // 오른쪽 -> 아래
+    case 'R':
+      return Direction::getDirectionBySymbol('D');
+    // 아래 -> 왼쪽
+    case 'D':
+      return Direction::getDirectionBySymbol('L');
+    // 왼쪽 -> 위쪽
+    case 'L':
+      return Direction::getDirectionBySymbol('U');
+    // 위쪽 -> 오른쪽
+    case 'U':
+      return Direction::getDirectionBySymbol('R');
+    default:
+      cout << "ERROR: getClockwise() got invalid direction" << endl;
+      return Direction(0, 0);
+    }
+  }
+
+  // 해당 객체의 반시계방향으로 회전하는 방향을 반환
+  Direction getCounterClockwise()
+  {
+    switch (getSymbol())
+    {
+    // 오른쪽 -> 위
+    case 'R':
+      return Direction::getDirectionBySymbol('U');
+    // 위 -> 왼쪽
+    case 'U':
+      return Direction::getDirectionBySymbol('L');
+    // 왼쪽 -> 아래쪽
+    case 'L':
+      return Direction::getDirectionBySymbol('D');
+    // 아래쪽 -> 오른쪽
+    case 'D':
+      return Direction::getDirectionBySymbol('R');
+    default:
+      cout << "ERROR: getCounterClockwise() got invalid direction" << endl;
+      return Direction(0, 0);
+    }
   }
 
   Direction &operator=(const Direction &s)

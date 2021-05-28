@@ -356,10 +356,8 @@ public:
   }
 
   /* snake.useGate를 호출하는 메서드
-     Precondition: turnOnGate가 호출되는 시점에 head의 좌표가 반드시 진입 좌표여야 한다.
-     만약 !gateActivated라면, false를 반환하고 이외의 경우 true를 반환한다.
-     만약 게이트 활성화 횟수가 남아 있지 않다면, isGate */
-  bool turnOnGate(Snake &s)
+     Precondition: turnOnGate가 호출되는 시점에 head의 좌표가 반드시 진입 좌표여야 한다. */
+  void turnOnGate(Snake &s)
   {
     Body head = *(s.getHead());
     Pos headPos = head.getPos();
@@ -455,6 +453,111 @@ public:
         }
 
         (*(s.getHead())).setLastSchedule(Pos(outX, outY));
+      }
+      // 규칙 2. 원래 진출하려던 방향이 막혀 있는 경우
+      else
+      {
+        // 1. 시계 방향 시도
+        Direction clockwiseDir = s.getlastdirection().getClockwise();
+        int clockwiseX = clockwiseDir.getXDirection();
+        int clockwiseY = clockwiseDir.getYDirection();
+        if (mapCodes[gateExitY + clockwiseY][gateExitX + clockwiseX] == EMPTY_CODE)
+        {
+          int outX = gateExitX + clockwiseX;
+          int outY = gateExitY + clockwiseY;
+
+          switch (s.getlastdirection().getSymbol())
+          {
+          case 'L':
+            outX += 1;
+            outY += 1;
+            break;
+          case 'R':
+            outX += 1;
+            outY += 1;
+            break;
+          case 'U':
+            outX += 1;
+            outY += 1;
+            break;
+          case 'D':
+            outX += 1;
+            outY += 1;
+            break;
+          }
+
+          (*(s.getHead())).setLastSchedule(Pos(outX, outY));
+          s.setLastDirection(clockwiseDir);
+          return;
+        }
+
+        // 2. 반시계 방향 시도
+        Direction counterClockwiseDir = s.getlastdirection().getCounterClockwise();
+        int counterX = counterClockwiseDir.getXDirection();
+        int counterY = counterClockwiseDir.getYDirection();
+        if (mapCodes[gateExitY + counterY][gateExitX + counterX] == EMPTY_CODE)
+        {
+          int outX = gateExitX + counterX;
+          int outY = gateExitY + counterY;
+
+          switch (s.getlastdirection().getSymbol())
+          {
+          case 'L':
+            outX += 1;
+            outY += 1;
+            break;
+          case 'R':
+            outX += 1;
+            outY += 1;
+            break;
+          case 'U':
+            outX += 1;
+            outY += 1;
+            break;
+          case 'D':
+            outX += 1;
+            outY += 1;
+            break;
+          }
+
+          (*(s.getHead())).setLastSchedule(Pos(outX, outY));
+          s.setLastDirection(counterClockwiseDir);
+          return;
+        }
+
+        // 3. 반대 방향 시도
+        Direction oppositeDir = Direction::getOppositeDirection(s.getlastdirection().getSymbol());
+        int oppositeX = oppositeDir.getXDirection();
+        int oppositeY = oppositeDir.getYDirection();
+        if (mapCodes[gateExitY + oppositeY][gateExitX + oppositeX] == EMPTY_CODE)
+        {
+          int outX = gateExitX + oppositeX;
+          int outY = gateExitY + oppositeY;
+
+          switch (s.getlastdirection().getSymbol())
+          {
+          case 'L':
+            outX += 1;
+            outY += 1;
+            break;
+          case 'R':
+            outX += 1;
+            outY += 1;
+            break;
+          case 'U':
+            outX += 1;
+            outY += 1;
+            break;
+          case 'D':
+            outX += 1;
+            outY += 1;
+            break;
+          }
+
+          (*(s.getHead())).setLastSchedule(Pos(outX, outY));
+          s.setLastDirection(oppositeDir);
+          return;
+        }
       }
     }
   }
