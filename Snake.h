@@ -392,34 +392,29 @@ public:
       return true;
     }
   }
-  /* Snake의 길이를 1만큼 늘이고 Body 정보를 갱신하는 함수
-     몸 길이의 상한선이 없으므로 항상 잘 작동하지만, 일관성을 위해 항상 true를 반환 */
-  bool lengthen()
+  /* Snake의 길이를 1만큼 늘이고 Body 정보를 갱신하는 함수 */
+  void lengthen()
   {
     char symbol = this->lastDirection.getSymbol();
     if (symbol == 'L')
     {
       bodies.push_back(Body(bodies[length - 1].get_currentx() + 1, bodies[length - 1].get_currenty(), bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty()));
       length += 1;
-      return true;
     }
     if (symbol == 'R')
     {
       bodies.push_back(Body(bodies[length - 1].get_currentx() - 1, bodies[length - 1].get_currenty(), bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty()));
       length += 1;
-      return true;
     }
     if (symbol == 'U')
     {
       bodies.push_back(Body(bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty() + 1, bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty()));
       length += 1;
-      return true;
     }
     if (symbol == 'D')
     {
       bodies.push_back(Body(bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty() - 1, bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty()));
       length += 1;
-      return true;
     }
   }
 
@@ -498,7 +493,7 @@ public:
     }
   }
   //snake의 몸통 이동 데이터 갱신
-  bool moveTo()
+  void moveTo()
   {
     char symbol = this->lastDirection.getSymbol();
     if (symbol == 'L')
@@ -518,8 +513,6 @@ public:
           }
         }
       }
-
-      return true;
     }
     if (symbol == 'R')
     {
@@ -534,8 +527,6 @@ public:
           }
         }
       }
-
-      return true;
     }
     if (symbol == 'U')
     {
@@ -550,8 +541,6 @@ public:
           }
         }
       }
-
-      return true;
     }
     if (symbol == 'D')
     {
@@ -566,8 +555,6 @@ public:
           }
         }
       }
-
-      return true;
     }
   }
   // 상태 점검 =============================================

@@ -196,6 +196,8 @@ public:
       mapStatus[growth_item_y][growth_item_x] = growth_item;
       mapCodes[growth_item_y][growth_item_x] = GROWTH_CODE;
       growthCnt = 1;
+
+      return true;
     }
   }
 
@@ -249,6 +251,8 @@ public:
       mapStatus[poison_item_y][poison_item_x] = poison_item;
       mapCodes[poison_item_y][poison_item_x] = POISON_CODE;
       poisonCnt = 1;
+
+      return true;
     }
   }
 
