@@ -205,7 +205,7 @@ int main()
           }
           /*사용자가 입력한 방향을 snake head의 새로운 방향으로 갱신
                       이때 기존 snake head의 뱡향과 반대되는 뱡향이 입력 될 경우에는 게임 오버*/
-          if (snake.change_head_direction(newdirection) != true)
+          if (snake.changeHeadDirection(newdirection) != true)
           {
             isGameOver = true;
           }

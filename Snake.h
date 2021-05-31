@@ -180,11 +180,28 @@ public:
     }
   }
 
-  Direction &operator=(const Direction &s)
+  // 전달된 방향이 메서드 호출 방향과 정반대라면 true, 아니라면 false를 반환
+  bool isOppositeWith(Direction &d)
+  {
+    return Direction::getOppositeDirection(d.getSymbol()) == *this;
+  }
+
+  Direction &
+  operator=(const Direction &s)
   {
     this->x = s.x;
     this->y = s.y;
     return *this;
+  }
+
+  bool operator==(const Direction &d)
+  {
+    return (this->x == d.x) && (this->y == d.y);
+  }
+
+  bool operator!=(const Direction &d)
+  {
+    return !(operator==(d));
   }
 };
 
@@ -213,12 +230,12 @@ public:
   }
 
   /* Body의 현재 위치를 다음 위치로 갱신한다.*/
-  void current_update()
+  void updateCurrentPos()
   {
     currentPos = nextPos;
   }
   //snake head 방향에 따라 snake head의 이동 스케줄을 새롭게 추가한다.
-  void head_schedule_update(char symbol)
+  void updateHeadSchedule(char symbol)
   {
     if (symbol == 'L')
       nextPos = Pos(currentPos.x - 1, currentPos.y);
@@ -229,11 +246,12 @@ public:
     else if (symbol == 'D')
       nextPos = Pos(currentPos.x, currentPos.y + 1);
   }
-  //snake head를 제외한 나머지 몸통의 이동 스케줄을 새롭게 추가한다
-  void schedule_update(Pos next_pos)
+  // snake head를 제외한 나머지 몸통의 이동 스케줄을 새롭게 추가한다
+  void updateSchedule(Pos next_pos)
   {
     this->nextPos = next_pos;
   }
+
   //snake 몸통의 현재 좌표를 반환
   int get_currentx() { return currentPos.x; }
   int get_currenty() { return currentPos.y; }
@@ -245,11 +263,10 @@ public:
   }
 
   // 마지막 스케줄을 해당 좌표로 바꿔줌
-  void setLastSchedule(Pos p)
+  void setNextPos(Pos p)
   {
     nextPos = p;
   }
-
   Pos getNextPos()
   {
     return nextPos;
@@ -378,30 +395,21 @@ public:
   {
     char symbol = this->lastDirection.getSymbol();
     if (symbol == 'L')
-    {
       bodies.push_back(Body(bodies[length - 1].get_currentx() + 1, bodies[length - 1].get_currenty(), bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty()));
-      length += 1;
-    }
     if (symbol == 'R')
-    {
       bodies.push_back(Body(bodies[length - 1].get_currentx() - 1, bodies[length - 1].get_currenty(), bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty()));
-      length += 1;
-    }
     if (symbol == 'U')
-    {
       bodies.push_back(Body(bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty() + 1, bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty()));
-      length += 1;
-    }
     if (symbol == 'D')
-    {
       bodies.push_back(Body(bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty() - 1, bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty()));
-      length += 1;
-    }
+
+    length += 1;
   }
 
   // 아이템 관련 =========================================
   /* 게이트를 사용해 Body의 위치와 이동 경로를 수정함. 일관성을 위해 항상 true를 반환하도록 설정 */
-  bool useGate(Manager &m, Direction direction);
+  bool
+  useGate(Manager &m, Direction direction);
 
   // 이동 관련 ============================================
   /* newDirection 방향으로 Snake를 이동시키고, lastDirection을 갱신함
@@ -410,68 +418,78 @@ public:
        단, 아이템이나 벽 충돌, 몸통 충돌 등으로 인한 게임 종료는 함수 외부에서 판단함 */
 
   //snake의 lastDirection을 newDirection 방향으로 갱신함
-  bool change_head_direction(Direction newDirection)
+  bool changeHeadDirection(Direction newDirection)
   {
     char symbol = this->lastDirection.getSymbol();
-    if (symbol == 'L')
+
+    // 새 방향이 기존 방향과 정반대인 경우 게임 오버
+    if (newDirection.isOppositeWith(lastDirection))
+      return false;
+    else if (newDirection.getSymbol() != 'X')
     {
-      //newDirection 방향이 기존 방향과 반대될 때
-      if (newDirection.getSymbol() == 'R')
-        return false;
-      //newDirection 방향이 반대 방향은 제외한 기존 방향과 다를 때
-      else if (newDirection.getSymbol() != 'X')
-      {
-        this->lastDirection = newDirection;
-        return true;
-      }
-      //newDirection 방향이 기존 방향과 동일할 때
-      else
-      {
-        return true;
-      }
+      this->lastDirection = newDirection;
+      return true;
     }
-    if (symbol == 'R')
-    {
-      if (newDirection.getSymbol() == 'L')
-        return false;
-      else if (newDirection.getSymbol() != 'X')
-      {
-        this->lastDirection = newDirection;
-        return true;
-      }
-      else
-      {
-        return true;
-      }
-    }
-    if (symbol == 'U')
-    {
-      if (newDirection.getSymbol() == 'D')
-        return false;
-      else if (newDirection.getSymbol() != 'X')
-      {
-        this->lastDirection = newDirection;
-        return true;
-      }
-      else
-      {
-        return true;
-      }
-    }
-    if (symbol == 'D')
-    {
-      if (newDirection.getSymbol() == 'U')
-        return false;
-      else if (newDirection.getSymbol() != 'X')
-      {
-        this->lastDirection = newDirection;
-        return true;
-      }
-      else
-      {
-        return true;
-      }
-    }
+
+    // if (symbol == 'L')
+    // {
+    //   //newDirection 방향이 기존 방향과 반대될 때
+    //   if (newDirection.getSymbol() == 'R')
+    //     return false;
+    //   //newDirection 방향이 반대 방향은 제외한 기존 방향과 다를 때
+    //   else if (newDirection.getSymbol() != 'X')
+    //   {
+    //     this->lastDirection = newDirection;
+    //     return true;
+    //   }
+    //   //newDirection 방향이 기존 방향과 동일할 때
+    //   else
+    //   {
+    //     return true;
+    //   }
+    // }
+    // if (symbol == 'R')
+    // {
+    //   if (newDirection.getSymbol() == 'L')
+    //     return false;
+    //   else if (newDirection.getSymbol() != 'X')
+    //   {
+    //     this->lastDirection = newDirection;
+    //     return true;
+    //   }
+    //   else
+    //   {
+    //     return true;
+    //   }
+    // }
+    // if (symbol == 'U')
+    // {
+    //   if (newDirection.getSymbol() == 'D')
+    //     return false;
+    //   else if (newDirection.getSymbol() != 'X')
+    //   {
+    //     this->lastDirection = newDirection;
+    //     return true;
+    //   }
+    //   else
+    //   {
+    //     return true;
+    //   }
+    // }
+    // if (symbol == 'D')
+    // {
+    //   if (newDirection.getSymbol() == 'U')
+    //     return false;
+    //   else if (newDirection.getSymbol() != 'X')
+    //   {
+    //     this->lastDirection = newDirection;
+    //     return true;
+    //   }
+    //   else
+    //   {
+    //     return true;
+    //   }
+    // }
   }
   //snake의 몸통 이동 데이터 갱신
   void moveTo()
@@ -480,14 +498,14 @@ public:
     char symbol = this->lastDirection.getSymbol();
 
     // 머리 위치 갱신
-    bodies[0].current_update();
-    bodies[0].head_schedule_update(symbol);
+    bodies[0].updateCurrentPos();
+    bodies[0].updateHeadSchedule(symbol);
 
     // 몸통 위치 갱신
     for (int i = 1; i < bodies.size(); i++)
     {
-      bodies[i].current_update();
-      bodies[i].schedule_update(Pos(bodies[i - 1].get_currentx(), bodies[i - 1].get_currenty()));
+      bodies[i].updateCurrentPos();
+      bodies[i].updateSchedule(Pos(bodies[i - 1].get_currentx(), bodies[i - 1].get_currenty()));
     }
   }
   // 상태 점검 =============================================

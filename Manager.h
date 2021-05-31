@@ -421,7 +421,7 @@ public:
         break;
       }
 
-      (*(s.getHead())).setLastSchedule(Pos(outX, outY));
+      (*(s.getHead())).setNextPos(Pos(outX, outY));
     }
     // 경우 2. 출구 게이트가 가장자리에 있지 않을 경우
     else
@@ -456,7 +456,7 @@ public:
           break;
         }
 
-        (*(s.getHead())).setLastSchedule(Pos(outX, outY));
+        (*(s.getHead())).setNextPos(Pos(outX, outY));
       }
       // 규칙 2. 원래 진출하려던 방향이 막혀 있는 경우
       else
@@ -490,7 +490,7 @@ public:
             break;
           }
 
-          (*(s.getHead())).setLastSchedule(Pos(outX, outY));
+          (*(s.getHead())).setNextPos(Pos(outX, outY));
           s.setLastDirection(clockwiseDir);
           return;
         }
@@ -524,7 +524,7 @@ public:
             break;
           }
 
-          (*(s.getHead())).setLastSchedule(Pos(outX, outY));
+          (*(s.getHead())).setNextPos(Pos(outX, outY));
           s.setLastDirection(counterClockwiseDir);
           return;
         }
@@ -558,7 +558,7 @@ public:
             break;
           }
 
-          (*(s.getHead())).setLastSchedule(Pos(outX, outY));
+          (*(s.getHead())).setNextPos(Pos(outX, outY));
           s.setLastDirection(oppositeDir);
           return;
         }
