@@ -247,14 +247,14 @@ public:
       nextPos = Pos(currentPos.x, currentPos.y + 1);
   }
   // snake head를 제외한 나머지 몸통의 이동 스케줄을 새롭게 추가한다
-  void updateSchedule(Pos next_pos)
+  void updateSchedule(Pos p)
   {
-    this->nextPos = next_pos;
+    this->nextPos = p;
   }
 
   //snake 몸통의 현재 좌표를 반환
-  int get_currentx() { return currentPos.x; }
-  int get_currenty() { return currentPos.y; }
+  int getCurrentX() { return currentPos.x; }
+  int getCurrentY() { return currentPos.y; }
 
   // 좌표 갱신
   void setPos(Pos p)
@@ -395,13 +395,13 @@ public:
   {
     char symbol = this->lastDirection.getSymbol();
     if (symbol == 'L')
-      bodies.push_back(Body(bodies[length - 1].get_currentx() + 1, bodies[length - 1].get_currenty(), bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty()));
+      bodies.push_back(Body(bodies[length - 1].getCurrentX() + 1, bodies[length - 1].getCurrentY(), bodies[length - 1].getCurrentX(), bodies[length - 1].getCurrentY()));
     if (symbol == 'R')
-      bodies.push_back(Body(bodies[length - 1].get_currentx() - 1, bodies[length - 1].get_currenty(), bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty()));
+      bodies.push_back(Body(bodies[length - 1].getCurrentX() - 1, bodies[length - 1].getCurrentY(), bodies[length - 1].getCurrentX(), bodies[length - 1].getCurrentY()));
     if (symbol == 'U')
-      bodies.push_back(Body(bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty() + 1, bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty()));
+      bodies.push_back(Body(bodies[length - 1].getCurrentX(), bodies[length - 1].getCurrentY() + 1, bodies[length - 1].getCurrentX(), bodies[length - 1].getCurrentY()));
     if (symbol == 'D')
-      bodies.push_back(Body(bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty() - 1, bodies[length - 1].get_currentx(), bodies[length - 1].get_currenty()));
+      bodies.push_back(Body(bodies[length - 1].getCurrentX(), bodies[length - 1].getCurrentY() - 1, bodies[length - 1].getCurrentX(), bodies[length - 1].getCurrentY()));
 
     length += 1;
   }
@@ -445,7 +445,7 @@ public:
     for (int i = 1; i < bodies.size(); i++)
     {
       bodies[i].updateCurrentPos();
-      bodies[i].updateSchedule(Pos(bodies[i - 1].get_currentx(), bodies[i - 1].get_currenty()));
+      bodies[i].updateSchedule(Pos(bodies[i - 1].getCurrentX(), bodies[i - 1].getCurrentY()));
     }
   }
   // 상태 점검 =============================================
@@ -455,7 +455,7 @@ public:
   {
     for (int i = 1; i < bodies.size(); i++)
     {
-      if ((bodies[0].get_currentx() == bodies[i].get_currentx()) && (bodies[0].get_currenty() == bodies[i].get_currenty()))
+      if ((bodies[0].getCurrentX() == bodies[i].getCurrentX()) && (bodies[0].getCurrentY() == bodies[i].getCurrentY()))
       {
         return true;
       }

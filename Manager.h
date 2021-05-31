@@ -54,8 +54,8 @@ private:
   Pos growthPos = Pos(0, 0);
   Pos poisonPos = Pos(0, 0);
   //생성된 아이템의 시각을 기록하는 변수
-  time_t init_growth;
-  time_t init_poison;
+  time_t growthCreatedTime;
+  time_t poisonCreatedTime;
   // 아이템의 유지 시간(초)
   const int GROWTH_DURATION = 60;
   const int POISON_DURATION = 5;
@@ -182,8 +182,8 @@ public:
     }
     else
     {
-      Growth growth_item;
-      init_growth = growth_item.time_check();
+      Growth growthItem;
+      growthCreatedTime = growthItem.time_check();
       srand((unsigned int)time(NULL));
 
       int y = growthPos.y, x = growthPos.x;
@@ -193,7 +193,7 @@ public:
         x = rand() % SIZE_X;
       }
       growthPos = Pos(x, y);
-      mapStatus[y][x] = growth_item;
+      mapStatus[y][x] = growthItem;
       mapCodes[y][x] = GROWTH_CODE;
       isGrowthCreated = true;
 
@@ -209,7 +209,7 @@ public:
     time_t end = time(NULL);
     int y = growthPos.y, x = growthPos.x;
 
-    if ((check == 0) && isGrowthCreated && (end - init_growth > GROWTH_DURATION))
+    if ((check == 0) && isGrowthCreated && (end - growthCreatedTime > GROWTH_DURATION))
     {
       mapStatus[y][x] = Empty();
       mapCodes[y][x] = 0;
@@ -240,8 +240,8 @@ public:
     }
     else
     {
-      Poison poison_item;
-      init_poison = poison_item.time_check();
+      Poison poisonItem;
+      poisonCreatedTime = poisonItem.time_check();
       srand((unsigned int)time(NULL));
 
       int y = poisonPos.y, x = poisonPos.x;
@@ -251,7 +251,7 @@ public:
         x = rand() % SIZE_X;
       }
       poisonPos = Pos(x, y);
-      mapStatus[y][x] = poison_item;
+      mapStatus[y][x] = poisonItem;
       mapCodes[y][x] = POISON_CODE;
       isPoisonCreated = true;
 
@@ -267,7 +267,7 @@ public:
     time_t end = time(NULL);
     int y = poisonPos.y, x = poisonPos.x;
 
-    if ((check == 0) && isPoisonCreated && (end - init_poison > POISON_DURATION))
+    if ((check == 0) && isPoisonCreated && (end - poisonCreatedTime > POISON_DURATION))
     {
       mapStatus[y][x] = Empty();
       mapCodes[y][x] = 0;
@@ -545,8 +545,8 @@ public:
         if ((mapCodes[i][j] == GROWTH_CODE) && snakeHead.getPos() == Pos(j + 1, i + 1))
         {
           s.lengthen();
-          int use_growth = s.getGrowthCnt();
-          s.setGrowhCnt(use_growth + 1);
+          int growthCnt = s.getGrowthCnt();
+          s.setGrowhCnt(growthCnt + 1);
           removeGrowth(1);
           return true;
         }
@@ -554,15 +554,15 @@ public:
         {
           if (s.shorten())
           {
-            int use_poison = s.getPoisonCnt();
-            s.setPoisonCnt(use_poison + 1);
+            int poisonCnt = s.getPoisonCnt();
+            s.setPoisonCnt(poisonCnt + 1);
             removePoison(1);
             return true;
           }
           else
           {
-            int use_poison = s.getPoisonCnt();
-            s.setPoisonCnt(use_poison + 1);
+            int poisonCnt = s.getPoisonCnt();
+            s.setPoisonCnt(poisonCnt + 1);
             removePoison(1);
             return false;
           }

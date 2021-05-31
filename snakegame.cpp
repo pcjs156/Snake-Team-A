@@ -239,7 +239,7 @@ int main()
       {
         for (int j = 0; j < BOARD_SIZE_X; j++)
         {
-          if ((map[i][j] == 1) && (bodies[0].get_currentx() == j + 1) && (bodies[0].get_currenty() == i + 1))
+          if ((map[i][j] == 1) && (bodies[0].getCurrentX() == j + 1) && (bodies[0].getCurrentY() == i + 1))
           {
             isGameOver = true;
           }
