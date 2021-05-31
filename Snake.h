@@ -194,10 +194,8 @@ class Body
 private:
   // Body의 현재 위치
   Pos currentPos;
-  /* Body가 앞으로 이동해야 할 좌표들의 모음
-       update를 수행할 때마다 현재 좌표를 맨 앞의 요소로 갱신하고,
-       해당 스케줄을 삭제한다. */
-  vector<Pos> scheduleQueue;
+  // Body가 다음으로 이동할 좌표
+  Pos nextPos;
 
 public:
   Body() {}
@@ -206,7 +204,7 @@ public:
   Body(int initX, int initY, int nextX, int nextY)
   {
     currentPos = Pos(initX, initY);
-    scheduleQueue.push_back(Pos(nextX, nextY));
+    nextPos = Pos(nextX, nextY);
   }
 
   Pos getPos()
@@ -214,44 +212,27 @@ public:
     return currentPos;
   }
 
-  /* Body의 현재 위치를 다음 위치로 갱신하고, 수행된 스케줄을 삭제한다.
-       수행 결과에 따라 다음의 값을 반환한다.
-       true: 정상 수행
-       false: scheduleQueue가 비어 있는 경우 */
-  bool current_update()
+  /* Body의 현재 위치를 다음 위치로 갱신한다.*/
+  void current_update()
   {
-    if (scheduleQueue.size() == 0)
-      return false;
-    // 현재 위치 갱신
-    currentPos = scheduleQueue[0];
-    // 맨 앞의 스케줄 삭제
-    scheduleQueue.erase(scheduleQueue.begin());
-    return true;
+    currentPos = nextPos;
   }
   //snake head 방향에 따라 snake head의 이동 스케줄을 새롭게 추가한다.
   void head_schedule_update(char symbol)
   {
     if (symbol == 'L')
-    {
-      scheduleQueue.push_back(Pos(currentPos.x - 1, currentPos.y));
-    }
+      nextPos = Pos(currentPos.x - 1, currentPos.y);
     else if (symbol == 'R')
-    {
-      scheduleQueue.push_back(Pos(currentPos.x + 1, currentPos.y));
-    }
+      nextPos = Pos(currentPos.x + 1, currentPos.y);
     else if (symbol == 'U')
-    {
-      scheduleQueue.push_back(Pos(currentPos.x, currentPos.y - 1));
-    }
+      nextPos = Pos(currentPos.x, currentPos.y - 1);
     else if (symbol == 'D')
-    {
-      scheduleQueue.push_back(Pos(currentPos.x, currentPos.y + 1));
-    }
+      nextPos = Pos(currentPos.x, currentPos.y + 1);
   }
   //snake head를 제외한 나머지 몸통의 이동 스케줄을 새롭게 추가한다
   void schedule_update(Pos next_pos)
   {
-    scheduleQueue.push_back(next_pos);
+    this->nextPos = next_pos;
   }
   //snake 몸통의 현재 좌표를 반환
   int get_currentx() { return currentPos.x; }
@@ -266,12 +247,12 @@ public:
   // 마지막 스케줄을 해당 좌표로 바꿔줌
   void setLastSchedule(Pos p)
   {
-    scheduleQueue[scheduleQueue.size() - 1] = p;
+    nextPos = p;
   }
 
-  vector<Pos> getSchedule()
+  Pos getNextPos()
   {
-    return scheduleQueue;
+    return nextPos;
   }
 };
 
@@ -495,66 +476,18 @@ public:
   //snake의 몸통 이동 데이터 갱신
   void moveTo()
   {
+    // 마지막으로 입력된 방향의 심볼
     char symbol = this->lastDirection.getSymbol();
-    if (symbol == 'L')
+
+    // 머리 위치 갱신
+    bodies[0].current_update();
+    bodies[0].head_schedule_update(symbol);
+
+    // 몸통 위치 갱신
+    for (int i = 1; i < bodies.size(); i++)
     {
-      //snake head의 현재 위치를 다음 위치로 갱신
-      if (bodies[0].current_update())
-      {
-        //snake 방향에 따른 snake head의 이동 스케줄을 새롭게 추가
-        bodies[0].head_schedule_update(symbol);
-        //snake head를 제외한 몸통들의 현재 위치를 다음 위치로 갱신
-        for (int i = 1; i < bodies.size(); i++)
-        {
-          if (bodies[i].current_update())
-          {
-            //snake head를 제외한 몸통들이 각각 자신의 앞에 있는 몸통의 현재 좌표값을 다음 이동 스케줄에 새롭게 추가
-            bodies[i].schedule_update(Pos(bodies[i - 1].get_currentx(), bodies[i - 1].get_currenty()));
-          }
-        }
-      }
-    }
-    if (symbol == 'R')
-    {
-      if (bodies[0].current_update())
-      {
-        bodies[0].head_schedule_update(symbol);
-        for (int i = 1; i < bodies.size(); i++)
-        {
-          if (bodies[i].current_update())
-          {
-            bodies[i].schedule_update(Pos(bodies[i - 1].get_currentx(), bodies[i - 1].get_currenty()));
-          }
-        }
-      }
-    }
-    if (symbol == 'U')
-    {
-      if (bodies[0].current_update())
-      {
-        bodies[0].head_schedule_update(symbol);
-        for (int i = 1; i < bodies.size(); i++)
-        {
-          if (bodies[i].current_update())
-          {
-            bodies[i].schedule_update(Pos(bodies[i - 1].get_currentx(), bodies[i - 1].get_currenty()));
-          }
-        }
-      }
-    }
-    if (symbol == 'D')
-    {
-      if (bodies[0].current_update())
-      {
-        bodies[0].head_schedule_update(symbol);
-        for (int i = 1; i < bodies.size(); i++)
-        {
-          if (bodies[i].current_update())
-          {
-            bodies[i].schedule_update(Pos(bodies[i - 1].get_currentx(), bodies[i - 1].get_currenty()));
-          }
-        }
-      }
+      bodies[i].current_update();
+      bodies[i].schedule_update(Pos(bodies[i - 1].get_currentx(), bodies[i - 1].get_currenty()));
     }
   }
   // 상태 점검 =============================================
