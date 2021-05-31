@@ -191,16 +191,16 @@ int main()
           switch (ch)
           {
           case KEY_LEFT:
-            newdirection.set_direction(-1, 0);
+            newdirection.setDirection(-1, 0);
             break;
           case KEY_RIGHT:
-            newdirection.set_direction(1, 0);
+            newdirection.setDirection(1, 0);
             break;
           case KEY_UP:
-            newdirection.set_direction(0, -1);
+            newdirection.setDirection(0, -1);
             break;
           case KEY_DOWN:
-            newdirection.set_direction(0, 1);
+            newdirection.setDirection(0, 1);
             break;
           }
           /*사용자가 입력한 방향을 snake head의 새로운 방향으로 갱신

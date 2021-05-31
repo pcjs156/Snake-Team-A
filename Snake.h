@@ -116,7 +116,7 @@ public:
       return 'X';
   }
   //해당 객체의 방향을 변경
-  void set_direction(int x, int y)
+  void setDirection(int x, int y)
   {
     this->x = x;
     this->y = y;
@@ -430,66 +430,6 @@ public:
       this->lastDirection = newDirection;
       return true;
     }
-
-    // if (symbol == 'L')
-    // {
-    //   //newDirection 방향이 기존 방향과 반대될 때
-    //   if (newDirection.getSymbol() == 'R')
-    //     return false;
-    //   //newDirection 방향이 반대 방향은 제외한 기존 방향과 다를 때
-    //   else if (newDirection.getSymbol() != 'X')
-    //   {
-    //     this->lastDirection = newDirection;
-    //     return true;
-    //   }
-    //   //newDirection 방향이 기존 방향과 동일할 때
-    //   else
-    //   {
-    //     return true;
-    //   }
-    // }
-    // if (symbol == 'R')
-    // {
-    //   if (newDirection.getSymbol() == 'L')
-    //     return false;
-    //   else if (newDirection.getSymbol() != 'X')
-    //   {
-    //     this->lastDirection = newDirection;
-    //     return true;
-    //   }
-    //   else
-    //   {
-    //     return true;
-    //   }
-    // }
-    // if (symbol == 'U')
-    // {
-    //   if (newDirection.getSymbol() == 'D')
-    //     return false;
-    //   else if (newDirection.getSymbol() != 'X')
-    //   {
-    //     this->lastDirection = newDirection;
-    //     return true;
-    //   }
-    //   else
-    //   {
-    //     return true;
-    //   }
-    // }
-    // if (symbol == 'D')
-    // {
-    //   if (newDirection.getSymbol() == 'U')
-    //     return false;
-    //   else if (newDirection.getSymbol() != 'X')
-    //   {
-    //     this->lastDirection = newDirection;
-    //     return true;
-    //   }
-    //   else
-    //   {
-    //     return true;
-    //   }
-    // }
   }
   //snake의 몸통 이동 데이터 갱신
   void moveTo()

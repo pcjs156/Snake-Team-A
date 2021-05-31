@@ -10,10 +10,10 @@
 #include "Objects.h"
 
 // 맵을 구성하는 요소들의 코드
-const int EMPTY_CODE = 0;           // 빈 공간
-const int WALL_CODE = 1;            // 벽
-const int IMMUNE_WALL_CODE = 2;     // 게이트가 생기지 않는 벽
-const int INIT_SNAKE_HEAD_CODE = 3; // Snake의 머리 부분
+const int EMPTY_CODE = 0;          // 빈 공간
+const int WALL_CODE = 1;           // 벽
+const int IMMUNE_WALL_CODE = 2;    // 게이트가 생기지 않는 벽
+const int INIT_snakeHead_CODE = 3; // Snake의 머리 부분
 const int GROWTH_CODE = 4;
 const int POISON_CODE = 5;
 const int GATE_CODE = 6;
@@ -48,13 +48,11 @@ private:
   Snake snake;
 
   // 현재 생성된 아이템의 개수를 기록하는 변수
-  int growthCnt = 0;
-  int poisonCnt = 0;
+  bool isGrowthCreated = false;
+  bool isPoisonCreated = false;
   //현재 생성된 아이템의 좌표를 기록하는 변수
-  int growth_item_x = 0;
-  int growth_item_y = 0;
-  int poison_item_x = 0;
-  int poison_item_y = 0;
+  Pos growthPos = Pos(0, 0);
+  Pos poisonPos = Pos(0, 0);
   //생성된 아이템의 시각을 기록하는 변수
   time_t init_growth;
   time_t init_poison;
@@ -65,9 +63,8 @@ private:
   // 현재 게이트가 생성되어 있는지 여부를 기록하는 변수
   bool isGateCreated = false;
   // 들어가는 게이트와 나오는 게이트의 좌표
-  // 안정성을 위해 아이템이 생성되어 있지 않을 때에는 -1로 할당해 놓을 것!
-  int gateEntranceX, gateEntranceY;
-  int gateExitX, gateExitY;
+  Pos gateEntrancePos = Pos(0, 0);
+  Pos gateExitPos = Pos(0, 0);
   // 게이트 생성이 시작되는 snake의 길이
   const int GATE_GENERATE_LEN = 3;
   // 게이트 유지 시간(초)
@@ -138,7 +135,7 @@ public:
     {
       for (int j = 0; j < SIZE_X; j++)
       {
-        if (mapCodes[i][j] == INIT_SNAKE_HEAD_CODE)
+        if (mapCodes[i][j] == INIT_snakeHead_CODE)
         {
           initSnakeY = i + 1;
           initSnakeX = j + 1;
@@ -179,7 +176,7 @@ public:
        Growth가 생성되어 있지 않다면 Growth를 생성하고 true를 반환한다. */
   bool createGrowth()
   {
-    if (growthCnt == 1)
+    if (isGrowthCreated)
     {
       return false;
     }
@@ -188,14 +185,17 @@ public:
       Growth growth_item;
       init_growth = growth_item.time_check();
       srand((unsigned int)time(NULL));
-      while (mapCodes[growth_item_y][growth_item_x] != 0)
+
+      int y = growthPos.y, x = growthPos.x;
+      while (mapCodes[y][x] != 0)
       {
-        growth_item_y = rand() % SIZE_Y;
-        growth_item_x = rand() % SIZE_X;
+        y = rand() % SIZE_Y;
+        x = rand() % SIZE_X;
       }
-      mapStatus[growth_item_y][growth_item_x] = growth_item;
-      mapCodes[growth_item_y][growth_item_x] = GROWTH_CODE;
-      growthCnt = 1;
+      growthPos = Pos(x, y);
+      mapStatus[y][x] = growth_item;
+      mapCodes[y][x] = GROWTH_CODE;
+      isGrowthCreated = true;
 
       return true;
     }
@@ -207,22 +207,22 @@ public:
   bool removeGrowth(int check)
   {
     time_t end = time(NULL);
-    if ((check == 0) && (growthCnt == 1) && (end - init_growth > GROWTH_DURATION))
+    int y = growthPos.y, x = growthPos.x;
+
+    if ((check == 0) && isGrowthCreated && (end - init_growth > GROWTH_DURATION))
     {
-      mapStatus[growth_item_y][growth_item_x] = Empty();
-      mapCodes[growth_item_y][growth_item_x] = 0;
-      growthCnt = 0;
-      growth_item_y = 0;
-      growth_item_x = 0;
+      mapStatus[y][x] = Empty();
+      mapCodes[y][x] = 0;
+      isGrowthCreated = false;
+      growthPos = Pos(0, 0);
       return true;
     }
     else if (check == 1)
     {
-      mapStatus[growth_item_y][growth_item_x] = Empty();
-      mapCodes[growth_item_y][growth_item_x] = 0;
-      growthCnt = 0;
-      growth_item_y = 0;
-      growth_item_x = 0;
+      mapStatus[y][x] = Empty();
+      mapCodes[y][x] = 0;
+      isGrowthCreated = false;
+      growthPos = Pos(0, 0);
       return true;
     }
     else
@@ -234,7 +234,7 @@ public:
        Poison이 생성되어 있지 않다면 Poison를 생성하고 true를 반환한다. */
   bool createPoison()
   {
-    if (poisonCnt == 1)
+    if (isPoisonCreated)
     {
       return false;
     }
@@ -243,14 +243,17 @@ public:
       Poison poison_item;
       init_poison = poison_item.time_check();
       srand((unsigned int)time(NULL));
-      while (mapCodes[poison_item_y][poison_item_x] != 0)
+
+      int y = poisonPos.y, x = poisonPos.x;
+      while (mapCodes[y][x] != 0)
       {
-        poison_item_y = rand() % SIZE_Y;
-        poison_item_x = rand() % SIZE_X;
+        y = rand() % SIZE_Y;
+        x = rand() % SIZE_X;
       }
-      mapStatus[poison_item_y][poison_item_x] = poison_item;
-      mapCodes[poison_item_y][poison_item_x] = POISON_CODE;
-      poisonCnt = 1;
+      poisonPos = Pos(x, y);
+      mapStatus[y][x] = poison_item;
+      mapCodes[y][x] = POISON_CODE;
+      isPoisonCreated = true;
 
       return true;
     }
@@ -262,22 +265,22 @@ public:
   bool removePoison(int check)
   {
     time_t end = time(NULL);
-    if ((check == 0) && (poisonCnt == 1) && (end - init_poison > POISON_DURATION))
+    int y = poisonPos.y, x = poisonPos.x;
+
+    if ((check == 0) && isPoisonCreated && (end - init_poison > POISON_DURATION))
     {
-      mapStatus[poison_item_y][poison_item_x] = Empty();
-      mapCodes[poison_item_y][poison_item_x] = 0;
-      poisonCnt = 0;
-      poison_item_y = 0;
-      poison_item_x = 0;
+      mapStatus[y][x] = Empty();
+      mapCodes[y][x] = 0;
+      isPoisonCreated = false;
+      poisonPos = Pos(0, 0);
       return true;
     }
     else if (check == 1)
     {
-      mapStatus[poison_item_y][poison_item_x] = Empty();
-      mapCodes[poison_item_y][poison_item_x] = 0;
-      poisonCnt = 0;
-      poison_item_y = 0;
-      poison_item_x = 0;
+      mapStatus[y][x] = Empty();
+      mapCodes[y][x] = 0;
+      isPoisonCreated = false;
+      poisonPos = Pos(0, 0);
       return true;
     }
     else
@@ -311,28 +314,34 @@ public:
       // 일단 들어가는 게이트와 나오는 게이트의 위치를 고정하되,
       // snake head가 먼저 gate에 접촉하는 쪽을 entrance로 나중에 수정해 주어야 함
       srand(time(NULL));
+
       // 들어가는 게이트
+      int entranceX, entranceY;
       while (true)
       {
-        gateEntranceX = rand() % SIZE_X;
-        gateEntranceY = rand() % SIZE_Y;
-        if (mapCodes[gateEntranceY][gateEntranceX] == WALL_CODE)
+        entranceX = rand() % SIZE_X;
+        entranceY = rand() % SIZE_Y;
+        if (mapCodes[entranceY][entranceX] == WALL_CODE)
           break;
       }
+      gateEntrancePos = Pos(entranceX, entranceY);
+
       // 나오는 게이트
+      int exitX, exitY;
       while (true)
       {
-        gateExitX = rand() % SIZE_X;
-        gateExitY = rand() % SIZE_Y;
-        if ((mapCodes[gateExitY][gateExitX] == WALL_CODE) &&
-            (gateExitX != gateEntranceX && gateExitY != gateEntranceY))
+        exitX = rand() % SIZE_X;
+        exitY = rand() % SIZE_Y;
+        gateExitPos = Pos(exitX, exitY);
+
+        if ((mapCodes[exitY][exitX] == WALL_CODE) && (gateEntrancePos != gateExitPos))
           break;
       }
 
-      mapStatus[gateEntranceY][gateEntranceX] = Gate();
-      mapStatus[gateExitY][gateExitX] = Gate();
-      mapCodes[gateEntranceY][gateEntranceX] = GATE_CODE;
-      mapCodes[gateExitY][gateExitX] = GATE_CODE;
+      mapStatus[entranceY][entranceX] = Gate();
+      mapStatus[exitY][exitX] = Gate();
+      mapCodes[entranceY][entranceX] = GATE_CODE;
+      mapCodes[exitY][exitX] = GATE_CODE;
 
       return true;
     }
@@ -350,12 +359,17 @@ public:
   {
     if (isGateCreated && (!isGateActivated()) && (time(NULL) - gateGenerated > GATE_DURATION_SEC))
     {
-      isGateCreated = false;
+      int entranceY = gateEntrancePos.y, entranceX = gateEntrancePos.x;
+      int exitY = gateExitPos.y, exitX = gateExitPos.x;
+
       // 맵에 기록되어 있는 게이트 정보 삭제
-      mapCodes[gateEntranceY][gateEntranceX] = WALL_CODE;
-      mapStatus[gateEntranceY][gateEntranceX] = Wall();
-      mapCodes[gateExitY][gateExitX] = WALL_CODE;
-      mapStatus[gateExitY][gateExitX] = Wall();
+      mapCodes[entranceY][entranceX] = WALL_CODE;
+      mapStatus[entranceY][entranceX] = Wall();
+      mapCodes[exitY][exitX] = WALL_CODE;
+      mapStatus[exitY][exitX] = Wall();
+
+      // 활성화 표시 해제
+      isGateCreated = false;
     }
   }
 
@@ -371,16 +385,23 @@ public:
     gateActivationLeft = s.getLength() - 1;
 
     // 만약 head가 들어가는 게이트가 이전에 설정해놓은 진입 게이트가 아니라면,
-    // 진입 게이트와 출구 게이트를 서로 바꿔 현재 접촉한 게이트가 진입 게이트임을 보장한다.
-    if (headPos != Pos(gateEntranceX + 1, gateEntranceY + 1))
-    {
-      int tmp = gateEntranceX;
-      gateEntranceX = gateExitX;
-      gateExitX = tmp;
+    // 진입 게이트와 출구 게이트를 서로 바꿔 현재 접촉한 게이트가 진입 게이트임을 보장한다. (swap)
+    int entranceY = gateEntrancePos.y, entranceX = gateEntrancePos.x;
+    int exitY = gateExitPos.y, exitX = gateExitPos.x;
 
-      tmp = gateEntranceY;
-      gateEntranceY = gateExitY;
-      gateExitY = tmp;
+    if (headPos != Pos(entranceX + 1, entranceY + 1))
+    {
+      int tmp = entranceX;
+      entranceX = exitX;
+      exitX = tmp;
+
+      tmp = entranceY;
+      entranceY = exitY;
+      exitY = tmp;
+
+      Pos tmpPos = gateEntrancePos;
+      gateEntrancePos = gateExitPos;
+      gateExitPos = tmpPos;
     }
 
     // 위치와 스케줄 갱신이 모두 완료된 상태이므로, 규칙에 따라 현재 게이트와 겹쳐 있는
@@ -397,29 +418,9 @@ public:
       s.setLastDirection(outDirection);
 
       // 나가는 게이트의 진출 방향으로 head의 위치를 바꿔줌
-      // int outX = gateExitX - outDirection.getXDirection();
-      // int outY = gateExitY - outDirection.getYDirection();
-
-      int outX = gateExitX;
-      int outY = gateExitY;
-
-      switch (symbolExitGateAtEdge)
-      {
-      case 'L':
-        outX += 2;
-        outY += 1;
-        break;
-      case 'R':
-        outY += 1;
-        break;
-      case 'U':
-        outX += 1;
-        outY += 2;
-        break;
-      case 'D':
-        outX += 1;
-        break;
-      }
+      int exitY = gateExitPos.y, exitX = gateExitPos.x;
+      int outX = exitX + (symbolExitGateAtEdge != 'R' ? 1 : 0) + (symbolExitGateAtEdge == 'L' ? 1 : 0);
+      int outY = exitY + (symbolExitGateAtEdge != 'D' ? 1 : 0) + (symbolExitGateAtEdge == 'U' ? 1 : 0);
 
       (*(s.getHead())).setNextPos(Pos(outX, outY));
     }
@@ -431,137 +432,60 @@ public:
       int directionY = s.getlastdirection().getYDirection();
 
       // 규칙 1. 원래 진출하려던 방향이 뚫려 있는 경우 그대로 진출
-      if (mapCodes[gateExitY + directionY][gateExitX + directionX] == EMPTY_CODE)
+      if (mapCodes[exitY + directionY][exitX + directionX] == EMPTY_CODE)
       {
-        int outX = gateExitX + directionX;
-        int outY = gateExitY + directionY;
-
-        switch (s.getlastdirection().getSymbol())
-        {
-        case 'L':
-          outX += 1;
-          outY += 1;
-          break;
-        case 'R':
-          outX += 1;
-          outY += 1;
-          break;
-        case 'U':
-          outX += 1;
-          outY += 1;
-          break;
-        case 'D':
-          outX += 1;
-          outY += 1;
-          break;
-        }
+        // 실제 위치 정보와 nCurses를 통해 보여지는 화면이 다른 것을 보정하기 위한 코드
+        int outX = exitX + directionX + 1;
+        int outY = exitY + directionY + 1;
 
         (*(s.getHead())).setNextPos(Pos(outX, outY));
       }
       // 규칙 2. 원래 진출하려던 방향이 막혀 있는 경우
       else
       {
+        // 빠져 나올 좌표
+        int outX = exitX, outY = exitY;
+        // 실제 위치 정보와 nCurses를 통해 보여지는 화면이 다른 것을 보정하기 위한 값
+        int dx, dy;
+
         // 1. 시계 방향 시도
         Direction clockwiseDir = s.getlastdirection().getClockwise();
         int clockwiseX = clockwiseDir.getXDirection();
         int clockwiseY = clockwiseDir.getYDirection();
-        if (mapCodes[gateExitY + clockwiseY][gateExitX + clockwiseX] == EMPTY_CODE)
-        {
-          int outX = gateExitX + clockwiseX;
-          int outY = gateExitY + clockwiseY;
-
-          switch (s.getlastdirection().getSymbol())
-          {
-          case 'L':
-            outX += 1;
-            outY += 1;
-            break;
-          case 'R':
-            outX += 1;
-            outY += 1;
-            break;
-          case 'U':
-            outX += 1;
-            outY += 1;
-            break;
-          case 'D':
-            outX += 1;
-            outY += 1;
-            break;
-          }
-
-          (*(s.getHead())).setNextPos(Pos(outX, outY));
-          s.setLastDirection(clockwiseDir);
-          return;
-        }
 
         // 2. 반시계 방향 시도
         Direction counterClockwiseDir = s.getlastdirection().getCounterClockwise();
         int counterX = counterClockwiseDir.getXDirection();
         int counterY = counterClockwiseDir.getYDirection();
-        if (mapCodes[gateExitY + counterY][gateExitX + counterX] == EMPTY_CODE)
-        {
-          int outX = gateExitX + counterX;
-          int outY = gateExitY + counterY;
-
-          switch (s.getlastdirection().getSymbol())
-          {
-          case 'L':
-            outX += 1;
-            outY += 1;
-            break;
-          case 'R':
-            outX += 1;
-            outY += 1;
-            break;
-          case 'U':
-            outX += 1;
-            outY += 1;
-            break;
-          case 'D':
-            outX += 1;
-            outY += 1;
-            break;
-          }
-
-          (*(s.getHead())).setNextPos(Pos(outX, outY));
-          s.setLastDirection(counterClockwiseDir);
-          return;
-        }
 
         // 3. 반대 방향 시도
         Direction oppositeDir = Direction::getOppositeDirection(s.getlastdirection().getSymbol());
         int oppositeX = oppositeDir.getXDirection();
         int oppositeY = oppositeDir.getYDirection();
-        if (mapCodes[gateExitY + oppositeY][gateExitX + oppositeX] == EMPTY_CODE)
+
+        if (mapCodes[exitY + clockwiseY][exitX + clockwiseX] == EMPTY_CODE)
         {
-          int outX = gateExitX + oppositeX;
-          int outY = gateExitY + oppositeY;
-
-          switch (s.getlastdirection().getSymbol())
-          {
-          case 'L':
-            outX += 1;
-            outY += 1;
-            break;
-          case 'R':
-            outX += 1;
-            outY += 1;
-            break;
-          case 'U':
-            outX += 1;
-            outY += 1;
-            break;
-          case 'D':
-            outX += 1;
-            outY += 1;
-            break;
-          }
-
-          (*(s.getHead())).setNextPos(Pos(outX, outY));
-          s.setLastDirection(oppositeDir);
-          return;
+          dx = clockwiseX;
+          dy = clockwiseY;
         }
+        // 2. 반시계 방향 시도
+        else if (mapCodes[exitY + counterY][exitX + counterX] == EMPTY_CODE)
+        {
+          dx = counterX;
+          dy = counterY;
+        }
+        // 3. 반대 방향 시도
+        else if (mapCodes[exitY + oppositeY][exitX + oppositeX] == EMPTY_CODE)
+        {
+          dx = oppositeX;
+          dy = oppositeY;
+        }
+
+        outX += dx;
+        outY += dy;
+
+        (*(s.getHead())).setNextPos(Pos(outX, outY));
+        s.setLastDirection(clockwiseDir);
       }
     }
   }
@@ -572,7 +496,10 @@ public:
     Body head = *(s).getHead();
     Pos headPos = head.getPos();
 
-    return ((headPos == Pos(gateExitX + 1, gateExitY + 1)) || (headPos == Pos(gateEntranceX + 1, gateEntranceY + 1)));
+    int entranceY = gateEntrancePos.y, entranceX = gateEntrancePos.x;
+    int exitY = gateExitPos.y, exitX = gateExitPos.x;
+
+    return ((headPos == Pos(exitX + 1, exitY + 1)) || (headPos == Pos(entranceX + 1, entranceY + 1)));
   }
 
   /* Snake의 마지막 Body가 진입 게이트와 겹치는지 확인하는 메서드*/
@@ -581,7 +508,9 @@ public:
     Body tail = s.getLastBody();
     Pos tailPos = tail.getPos();
 
-    return (tailPos == Pos(gateEntranceX + 1, gateEntranceY + 1));
+    int entranceY = gateEntrancePos.y, entranceX = gateEntrancePos.x;
+
+    return (tailPos == Pos(entranceX + 1, entranceY + 1));
   }
 
   /* 출구 게이트의 좌표가 가장자리인지 확인하는 메서드
@@ -589,14 +518,16 @@ public:
      가장자리가 아닌 경우 -1을 반환한다. */
   char isExitGateAtEdge()
   {
+    int exitY = gateExitPos.y, exitX = gateExitPos.x;
+
     // 왼쪽 벽인 경우
-    if (gateExitX == 0)
+    if (exitX == 0)
       return 'L';
-    else if (gateExitX == (SIZE_X - 1))
+    else if (exitX == (SIZE_X - 1))
       return 'R';
-    else if (gateExitY == 0)
+    else if (exitY == 0)
       return 'U';
-    else if (gateExitY == (SIZE_Y - 1))
+    else if (exitY == (SIZE_Y - 1))
       return 'D';
     else
       return -1;
@@ -606,12 +537,12 @@ public:
       (Snake.h에 있던 useItem() 함수 기능을 합쳤습니다!)*/
   bool useItem(Snake &s)
   {
-    Body snake_head = *(s).getHead();
+    Body snakeHead = *(s).getHead();
     for (int i = 0; i < SIZE_Y; i++)
     {
       for (int j = 0; j < SIZE_X; j++)
       {
-        if ((mapCodes[i][j] == GROWTH_CODE) && (snake_head.get_currentx() == j + 1) && (snake_head.get_currenty() == i + 1))
+        if ((mapCodes[i][j] == GROWTH_CODE) && snakeHead.getPos() == Pos(j + 1, i + 1))
         {
           s.lengthen();
           int use_growth = s.getGrowthCnt();
@@ -619,7 +550,7 @@ public:
           removeGrowth(1);
           return true;
         }
-        else if ((mapCodes[i][j] == POISON_CODE) && (snake_head.get_currentx() == j + 1) && (snake_head.get_currenty() == i + 1))
+        else if ((mapCodes[i][j] == POISON_CODE) && snakeHead.getPos() == Pos(j + 1, i + 1))
         {
           if (s.shorten())
           {
