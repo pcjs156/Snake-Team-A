@@ -58,7 +58,7 @@ public:
 
   Direction(int x, int y) : x(x), y(y) {}
 
-  // char형 매개 변수(이하 symbol)를 받아 Direction 객체를 만들어 반환함
+  // char형 매개 변수(이하 symbol)를 받아 Direction 객체를 만들어 반환
   static Direction getDirectionBySymbol(char symbol)
   {
     switch (symbol)
@@ -77,7 +77,7 @@ public:
     return Direction(0, 0);
   }
 
-  // 전달된 symbol의 반대 방향 Direction 객체를 만들어 반환함
+  // 전달된 symbol의 반대 방향 Direction 객체를 만들어 반환
   static Direction getOppositeDirection(char symbol)
   {
     switch (symbol)
@@ -115,6 +115,7 @@ public:
     else
       return 'X';
   }
+
   //해당 객체의 방향을 변경
   void setDirection(int x, int y)
   {
@@ -122,72 +123,11 @@ public:
     this->y = y;
   }
 
-  // 해당 객체의 X 방향을 반환
-  int getXDirection()
-  {
-    return x;
-  }
+  // 해당 객체의 좌표 성분을 반환
+  int getXDirection() { return x; }
+  int getYDirection() { return y; }
 
-  // 해당 객체의 Y 방향을 반환
-  int getYDirection()
-  {
-    return y;
-  }
-
-  // 해당 객체의 시계 방향으로 회전하는 방향을 반환
-  Direction getClockwise()
-  {
-    switch (getSymbol())
-    {
-    // 오른쪽 -> 아래
-    case 'R':
-      return Direction::getDirectionBySymbol('D');
-    // 아래 -> 왼쪽
-    case 'D':
-      return Direction::getDirectionBySymbol('L');
-    // 왼쪽 -> 위쪽
-    case 'L':
-      return Direction::getDirectionBySymbol('U');
-    // 위쪽 -> 오른쪽
-    case 'U':
-      return Direction::getDirectionBySymbol('R');
-    default:
-      cout << "ERROR: getClockwise() got invalid direction" << endl;
-      return Direction(0, 0);
-    }
-  }
-
-  // 해당 객체의 반시계방향으로 회전하는 방향을 반환
-  Direction getCounterClockwise()
-  {
-    switch (getSymbol())
-    {
-    // 오른쪽 -> 위
-    case 'R':
-      return Direction::getDirectionBySymbol('U');
-    // 위 -> 왼쪽
-    case 'U':
-      return Direction::getDirectionBySymbol('L');
-    // 왼쪽 -> 아래쪽
-    case 'L':
-      return Direction::getDirectionBySymbol('D');
-    // 아래쪽 -> 오른쪽
-    case 'D':
-      return Direction::getDirectionBySymbol('R');
-    default:
-      cout << "ERROR: getCounterClockwise() got invalid direction" << endl;
-      return Direction(0, 0);
-    }
-  }
-
-  // 전달된 방향이 메서드 호출 방향과 정반대라면 true, 아니라면 false를 반환
-  bool isOppositeWith(Direction &d)
-  {
-    return Direction::getOppositeDirection(d.getSymbol()) == *this;
-  }
-
-  Direction &
-  operator=(const Direction &s)
+  Direction &operator=(const Direction &s)
   {
     this->x = s.x;
     this->y = s.y;
@@ -203,6 +143,15 @@ public:
   {
     return !(operator==(d));
   }
+
+  // 해당 객체의 시계 방향으로 회전하는 방향을 반환
+  Direction getClockwise();
+
+  // 해당 객체의 반시계방향으로 회전하는 방향을 반환
+  Direction getCounterClockwise();
+
+  // 전달된 방향이 메서드 호출 방향과 정반대라면 true, 아니라면 false를 반환
+  bool isOppositeWith(Direction &d);
 };
 
 /* Snake를 구성하는 몸통(+머리) */
@@ -229,44 +178,32 @@ public:
     return currentPos;
   }
 
-  /* Body의 현재 위치를 다음 위치로 갱신한다.*/
+  // Body의 현재 위치를 다음 위치로 갱신한다.
   void updateCurrentPos()
   {
     currentPos = nextPos;
   }
+
   //snake head 방향에 따라 snake head의 이동 스케줄을 새롭게 추가한다.
-  void updateHeadSchedule(char symbol)
-  {
-    if (symbol == 'L')
-      nextPos = Pos(currentPos.x - 1, currentPos.y);
-    else if (symbol == 'R')
-      nextPos = Pos(currentPos.x + 1, currentPos.y);
-    else if (symbol == 'U')
-      nextPos = Pos(currentPos.x, currentPos.y - 1);
-    else if (symbol == 'D')
-      nextPos = Pos(currentPos.x, currentPos.y + 1);
-  }
-  // snake head를 제외한 나머지 몸통의 이동 스케줄을 새롭게 추가한다
-  void updateSchedule(Pos p)
-  {
-    this->nextPos = p;
-  }
+  void updateHeadSchedule(char symbol);
 
   //snake 몸통의 현재 좌표를 반환
   int getCurrentX() { return currentPos.x; }
   int getCurrentY() { return currentPos.y; }
 
-  // 좌표 갱신
+  // 현재 좌표 정보 갱신
   void setPos(Pos p)
   {
     currentPos = Pos(p.x, p.y);
   }
 
-  // 마지막 스케줄을 해당 좌표로 바꿔줌
+  // 다음 위치를 해당 좌표로 바꿔줌
   void setNextPos(Pos p)
   {
     nextPos = p;
   }
+
+  // 다음 위치를 반환
   Pos getNextPos()
   {
     return nextPos;
@@ -289,179 +226,73 @@ private:
   int initX, initY;
 
 public:
-  Snake() {}
   // Constructor
-  Snake(int initX, int initY)
-  {
-    // ()= 연산자 오버로딩에 사용됨)
-    this->initX = initX;
-    this->initY = initY;
+  Snake() {}
+  Snake(int initX, int initY);
 
-    // 몸 길이 초기화
-    length = 3;
-    // 아이템 획득/게이트 통과 횟수 초기화
-    growthCnt = 0;
-    poisonCnt = 0;
-    gateCnt = 0;
-
-    // 왼쪽 방향을 기본 방향으로 함
-    lastDirection = Direction::getDirectionBySymbol('L');
-
-    // 맨 처음에는 ">~~" 이렇게 왼쪽을 보고 움직이도록 설정
-    bodies.push_back(Body(initX, initY, initX - 1, initY));
-    bodies.push_back(Body(initX + 1, initY, initX, initY));
-    bodies.push_back(Body(initX + 2, initY, initX + 1, initY));
-  }
-
-  Snake &operator=(const Snake &s)
-  {
-    // ()= 연산자 오버로딩에 사용됨)
-    this->initX = s.initX;
-    this->initY = s.initY;
-
-    // 몸 길이 초기화
-    length = 3;
-    // 아이템 획득/게이트 통과 횟수 초기화
-    growthCnt = 0;
-    poisonCnt = 0;
-    gateCnt = 0;
-
-    // 왼쪽 방향을 기본 방향으로 함
-    lastDirection = Direction::getDirectionBySymbol('L');
-
-    // 맨 처음에는 ">~~" 이렇게 왼쪽을 보고 움직이도록 설정
-    bodies.push_back(Body(initX, initY, initX - 1, initY));
-    bodies.push_back(Body(initX + 1, initY, initX, initY));
-    bodies.push_back(Body(initX + 2, initY, initX + 1, initY));
-
-    return *this;
-  }
+  Snake &operator=(const Snake &s);
 
   // Getter ============================================
-  int getLength() { return length; }
-  int getGrowthCnt() { return growthCnt; }
-  int getPoisonCnt() { return poisonCnt; }
-  int getGateCnt() { return gateCnt; }
-  vector<Body> getBodies() { return bodies; }
-  Direction getlastdirection() { return lastDirection; }
-  /* body의 맨 앞 레퍼런스를 반환함
+  // 몸 길이를 반환
+  int getLength();
+  // 획득한 growth의 개수를 반환
+  int getGrowthCnt();
+  // 획득한 poison의 개수를 반환
+  int getPoisonCnt();
+  // 게이트 통과 횟수를 반환
+  int getGateCnt();
+  // body 객체를 담은 vector를 반환
+  vector<Body> getBodies();
+  // 입력된 마지막 입력 방향을 반환
+  Direction getlastdirection();
+
+  /* body의 맨 앞 레퍼런스(머리)를 반환
        Precondition: bodies가 비어 있으면 안됨 */
-  Body *getHead()
-  {
-    return &bodies[0];
-  }
-  /* head의 좌표를 Pos로 반환함 */
-  Pos getHeadPos()
-  {
-    return bodies[0].getPos();
-  }
-  /* 맨 마지막 Body의 레퍼런스를 반환함 */
-  Body getLastBody()
-  {
-    return bodies[length - 1];
-  }
+  Body *getHead();
+  // head의 좌표를 Pos로 반환
+  Pos getHeadPos();
+  // 맨 마지막 Body의 레퍼런스를 반환
+  Body getLastBody();
 
   // Setter =============================================
-  void setLength(int length) { this->length = length; };
-  void setGrowhCnt(int cnt) { this->growthCnt = cnt; };
-  void setPoisonCnt(int cnt) { this->poisonCnt = cnt; };
-  void setGateCnt(int cnt) { this->gateCnt; };
-  void setHeadPos(Pos p)
-  {
-    bodies[0].setPos(p);
-  }
-  void setLastDirection(Direction d)
-  {
-    lastDirection = d;
-  }
+  // 획득한 growth의 개수를 갱신
+  void setGrowhCnt(int cnt);
+  // 획득한 poison의 개수를 갱신
+  void setPoisonCnt(int cnt);
+  // 게이트 통과 횟수를 갱신
+  void setGateCnt(int cnt);
+  // snake의 머리 위치를 갱신
+  void setHeadPos(Pos p);
+  // 마지막으로 입력된 방향을 갱신
+  void setLastDirection(Direction d);
 
   // 몸 길이 관련 ========================================
   /* Snake의 길이를 1만큼 줄이는 함수
      길이를 더 줄일 수 없다면(줄이면 뱀이 죽는다면) 길이를 갱신하지 않고 false를 반환
      길이를 더 줄일 수 있다면 길이와 Body 정보를 갱신하고 true를 반환 */
-  bool shorten()
-  {
-    if (length == MIN_LENGTH)
-      return false;
-    else
-    {
-      length -= 1;
-      bodies.pop_back();
-      return true;
-    }
-  }
-  /* Snake의 길이를 1만큼 늘이고 Body 정보를 갱신하는 함수 */
-  void lengthen()
-  {
-    char symbol = this->lastDirection.getSymbol();
-    if (symbol == 'L')
-      bodies.push_back(Body(bodies[length - 1].getCurrentX() + 1, bodies[length - 1].getCurrentY(), bodies[length - 1].getCurrentX(), bodies[length - 1].getCurrentY()));
-    if (symbol == 'R')
-      bodies.push_back(Body(bodies[length - 1].getCurrentX() - 1, bodies[length - 1].getCurrentY(), bodies[length - 1].getCurrentX(), bodies[length - 1].getCurrentY()));
-    if (symbol == 'U')
-      bodies.push_back(Body(bodies[length - 1].getCurrentX(), bodies[length - 1].getCurrentY() + 1, bodies[length - 1].getCurrentX(), bodies[length - 1].getCurrentY()));
-    if (symbol == 'D')
-      bodies.push_back(Body(bodies[length - 1].getCurrentX(), bodies[length - 1].getCurrentY() - 1, bodies[length - 1].getCurrentX(), bodies[length - 1].getCurrentY()));
+  bool shorten();
 
-    length += 1;
-  }
+  // Snake의 길이를 1만큼 늘이고 Body 정보를 갱신하는 함수
+  void lengthen();
 
   // 아이템 관련 =========================================
-  /* 게이트를 사용해 Body의 위치와 이동 경로를 수정함. 일관성을 위해 항상 true를 반환하도록 설정 */
-  bool
-  useGate(Manager &m, Direction direction);
+  // 게이트를 사용해 Body의 위치와 이동 경로를 수정함.일관성을 위해 항상 true를 반환하도록 설정 bool
+  bool useGate(Manager &m, Direction direction);
 
   // 이동 관련 ============================================
   /* newDirection 방향으로 Snake를 이동시키고, lastDirection을 갱신함
        만약 newDirection이 lastDirection과 반대 방향이라면, false를 반환해 게임을 종료할 수 있도록 하고
        그렇지 않은 경우 true를 반환하여 메서드가 제대로 실행 되었음을 외부에 알림
        단, 아이템이나 벽 충돌, 몸통 충돌 등으로 인한 게임 종료는 함수 외부에서 판단함 */
+  bool changeHeadDirection(Direction newDirection);
 
-  //snake의 lastDirection을 newDirection 방향으로 갱신함
-  bool changeHeadDirection(Direction newDirection)
-  {
-    char symbol = this->lastDirection.getSymbol();
-
-    // 새 방향이 기존 방향과 정반대인 경우 게임 오버
-    if (newDirection.isOppositeWith(lastDirection))
-      return false;
-    else if (newDirection.getSymbol() != 'X')
-    {
-      this->lastDirection = newDirection;
-      return true;
-    }
-  }
   //snake의 몸통 이동 데이터 갱신
-  void moveTo()
-  {
-    // 마지막으로 입력된 방향의 심볼
-    char symbol = this->lastDirection.getSymbol();
+  void moveTo();
 
-    // 머리 위치 갱신
-    bodies[0].updateCurrentPos();
-    bodies[0].updateHeadSchedule(symbol);
-
-    // 몸통 위치 갱신
-    for (int i = 1; i < bodies.size(); i++)
-    {
-      bodies[i].updateCurrentPos();
-      bodies[i].updateSchedule(Pos(bodies[i - 1].getCurrentX(), bodies[i - 1].getCurrentY()));
-    }
-  }
   // 상태 점검 =============================================
   /* 머리가 자신의 몸통과 부딪혔는지 확인하는 메서드
        Precondition: moveTo 메서드에 의해 이동이 완전히 끝난 후에 호출해야 함*/
-  bool isBumpedToBody()
-  {
-    for (int i = 1; i < bodies.size(); i++)
-    {
-      if ((bodies[0].getCurrentX() == bodies[i].getCurrentX()) && (bodies[0].getCurrentY() == bodies[i].getCurrentY()))
-      {
-        return true;
-      }
-    }
-    return false;
-  }
+  bool isBumpedToBody();
 };
 
 #endif
