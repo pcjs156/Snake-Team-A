@@ -17,6 +17,7 @@ using namespace std;
 // 정적 전역 변수 설정
 const int TICK = 0.5;       // 화면을 갱신할 주기
 const int TOTAL_STAGES = 1; // 스테이지 개수
+const clock_t TICK_MILSEC = 50000000000;
 
 // 게임 보드의 실제 크기
 const int BOARD_SIZE_Y = 25;
@@ -190,21 +191,21 @@ int main()
           switch (ch)
           {
           case KEY_LEFT:
-            newdirection.set_direction(-1, 0);
+            newdirection.setDirection(-1, 0);
             break;
           case KEY_RIGHT:
-            newdirection.set_direction(1, 0);
+            newdirection.setDirection(1, 0);
             break;
           case KEY_UP:
-            newdirection.set_direction(0, -1);
+            newdirection.setDirection(0, -1);
             break;
           case KEY_DOWN:
-            newdirection.set_direction(0, 1);
+            newdirection.setDirection(0, 1);
             break;
           }
           /*사용자가 입력한 방향을 snake head의 새로운 방향으로 갱신
                       이때 기존 snake head의 뱡향과 반대되는 뱡향이 입력 될 경우에는 게임 오버*/
-          if (snake.change_head_direction(newdirection) != true)
+          if (snake.changeHeadDirection(newdirection) != true)
           {
             isGameOver = true;
           }
@@ -212,13 +213,13 @@ int main()
         /*프로그램이 시작한 시점부터 키 입력 확인 및 반영 기능 이후까지 경과한 시간에서
                     프로그램 시작 시점부터 입력 받기 전까지 경과한 시간의 차*/
         currentTime += clock() - refTime;
-        if (currentTime > 50000000000)
-        { //그 시간 차가 50000000000을 넘었을 때 데이터 갱신 및 렌더닝 기능으로 넘어가기
+        if (currentTime > TICK_MILSEC)
+        { //그 시간 차가 TICK_MILSEC을 넘었을 때 데이터 갱신 및 렌더닝 기능으로 넘어가기
           currentTime = 0;
           break;
         }
-        /* 값을 50000000000으로 설정한 것은 이 값보다 작게 설정하면 너무 짧은 시간 간격으로 렌더링이 이뤄져서
-                     지렁이 이동속도가 넘무 빠르고 너무 큰 수를 하면 너무 delay가 심해서 적당한 값을 찾다가 50000000000으로 설정하였습니다!
+        /* 값을 TICK_MILSEC으로 설정한 것은 이 값보다 작게 설정하면 너무 짧은 시간 간격으로 렌더링이 이뤄져서
+                     지렁이 이동속도가 넘무 빠르고 너무 큰 수를 하면 너무 delay가 심해서 적당한 값을 찾다가 TICK_MILSEC으로 설정하였습니다!
                      값 수정하셔도 좋습니다!*/
       }
       //이하 데이터 갱신===============================================================
@@ -238,7 +239,7 @@ int main()
       {
         for (int j = 0; j < BOARD_SIZE_X; j++)
         {
-          if ((map[i][j] == 1) && (bodies[0].get_currentx() == j + 1) && (bodies[0].get_currenty() == i + 1))
+          if ((map[i][j] == 1) && (bodies[0].getCurrentX() == j + 1) && (bodies[0].getCurrentY() == i + 1))
           {
             isGameOver = true;
           }
@@ -261,7 +262,11 @@ int main()
       manager.createPoison();
 
       // 게이트 생성
-      manager.createGate();
+      manager.createGate(snake);
+      // 게이트가 활성화된 상태일 때 매 tick마다 gateActivationLeft를 줄여주기 위한 것
+      if (manager.isGateActivated())
+        manager.updateGateActivationLeft();
+
       // 만약 게이트에 접촉했다면(게이트와 헤드가 겹친다면),
       // snake의 위치와 스케줄을 갱신함
       if (manager.isHeadAtGate(snake))
@@ -269,17 +274,20 @@ int main()
         manager.turnOnGate(snake);
       }
       // 게이트가 활성되어 있는 경우, 게이트 진입점에 꼬리가 도달했는지 확인
-      if (manager.isTailAtEntranceGate(snake))
+      // if ()
+      // {
+      //   manager.removeGate();
+      // }
+      // 만약 게이트가 활성화 되어 있지 않은 상태라면,
+      // removeGate 내부에서 조건을 검사하고 게이트를 삭제한다.
+      // else
+      // {
+      // 게이트가 활성화되어 있지 않은 경우 게이트 삭제를 시도
+      // 게이트의 삭제 조건은 revmoeGate에서 따짐
+      if (!manager.isGateActivated())
       {
         manager.removeGate();
       }
-      // // 만약 게이트가 활성화 되어 있지 않은 상태라면,
-      // // removeGate 내부에서 조건을 검사하고 게이트를 삭제한다.
-      // else
-      // {
-      //   if (!manager.isGateActivated())
-      //     manager.removeGate();
-      // }
 
       // 이하 렌더링 =================================================================
       // 게임 보드 렌더링

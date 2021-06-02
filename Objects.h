@@ -70,13 +70,6 @@ public:
         symbol = "*";
         CREATED_TIME = time(NULL);
     }
-
-    // Snake의 상태를 갱신함
-    // Item을 상속받는 Growth, Poison에서 재정의해야함
-    virtual bool affect(Snake &s)
-    {
-        return false;
-    }
 };
 
 class Growth : public Item
@@ -97,7 +90,6 @@ class Poison : public Item
 public:
     Poison()
     {
-
         symbol = "-";
     }
     time_t time_check()
