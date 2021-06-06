@@ -150,18 +150,21 @@ void Snake::setLastDirection(Direction d)
 }
 
 // 몸 길이 관련 ========================================
+//snake의 몸 길이를 1만큼 줄이기
 bool Snake::shorten()
 {
-    if (length == MIN_LENGTH)
+    if (length == MIN_LENGTH)  //현재 몸 길이가 3인 경우 줄일 수가 없기 때문에 false 반환
         return false;
-    else
+    else   //현재 몸 길이가 3보다 큰 경우
     {
         length -= 1;
         bodies.pop_back();
         return true;
     }
 }
-
+/*snake의 몸 길이를 1만큼 늘리기
+  snake의 lastDirection의 값에 따라 새로운 body객체 생성 및 bodies 벡터에 추가
+  몸 길이를 나타내는 변수에 -1*/
 void Snake::lengthen()
 {
     char symbol = this->lastDirection.getSymbol();

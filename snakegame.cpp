@@ -230,9 +230,7 @@ int main()
       // 상태 점검===================================================================
       //벽 부딪침 확인
       /* 게임 매니저와 상호작용하여 현재 벽에 부딪힌 상태인지(머리가 벽과 겹쳐 있는지) 확인하는 메서드
-        벽에 부딪힌 상태라면 게임오버를 반환함
-        (snake.h에서 구현을 하였으나 'Invalid use of incomplete type'가 발생하였고, 오류를 해결할 방법을 찾지 못해
-        일단 여기서 구현을 하였습니다ㅜㅜ)*/
+        벽에 부딪힌 상태라면 게임오버를 반환함*/
       int **map = manager.getMapCodes();
       vector<Body> bodies(snake.getBodies());
       for (int i = 0; i < BOARD_SIZE_Y; i++)
@@ -251,8 +249,8 @@ int main()
       //벽과 지렁이가 있는 곳이 아닌 지점에 아이템 랜덤생성
       manager.createGrowth();
       manager.createPoison();
-      //아이템과 snake가 접촉하였는지 확인 및 아이템 사용 후, snake 길이가 3보다 짧아질 경우
-      if (manager.useItem(snake) == false)
+      //아이템과 snake가 접촉하였는지 확인 및 아이템 사용 및 아이템 삭제
+      if (manager.useItem(snake) == false)    //snake 길이가 3보다 짧아질 경우 게임 오버
         isGameOver = true;
       //아이템 사용을 하지 않았고 생성된지 5초가 경과되었을 경우 아이템 삭제
       manager.removeGrowth(0);

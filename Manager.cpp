@@ -85,9 +85,12 @@ Manager::~Manager()
 
 // Constructor/Destructor finished ================================
 // items begins ===================================================
+/*이미 Growth 아이템이 생성되어 있으면 fasle 반환
+  아이템이 생성되어 있지 않으면 아이템 생성 및 생성 시간 기록, 게임 맵에서 벽을 제외한 빈공간 중 랜덤한 좌표를 아이템 좌표로 설정
+  아이템 생성 여부를 true로 표시 후 true 반환*/
 bool Manager::createGrowth()
 {
-    if (isGrowthCreated)
+    if (isGrowthCreated)    //이미 아이템이 생성되어 있을 때
     {
         return false;
     }
@@ -111,13 +114,16 @@ bool Manager::createGrowth()
         return true;
     }
 }
-
+/*Growth 아이템이 생성되어 있는 상태에서 현재 시간을 측정,
+  만약 snake head가 Growth 아이템을 접촉하지 않았고 Growth 아이템 생성 시간과 현재 시간이 5초 차이가 날 때 게임 맵에서 아이템을 삭제한 뒤 아이템 생성 여부를 false로 표시한 후, true 반환
+  만약 snake head가 Growth 아이템을 접촉했을 때 즉시 게임 맵에서 아이템을 삭제한 뒤 아이템 생성 여부를 false로 표시한 후, true 반환
+  두 조건에 해당되지 않으면 false를 반환*/
 bool Manager::removeGrowth(int check)
 {
     time_t end = time(NULL);
     int y = growthPos.y, x = growthPos.x;
 
-    if ((check == 0) && isGrowthCreated && (end - growthCreatedTime > GROWTH_DURATION))
+    if ((check == 0) && isGrowthCreated && (end - growthCreatedTime > GROWTH_DURATION))   //snake head가 Growth 아이템을 접촉하지 않았고 Growth 아이템 생성 시간과 현재 시간이 5초 차이가 날 때
     {
         mapStatus[y][x] = Empty();
         mapCodes[y][x] = 0;
@@ -125,7 +131,7 @@ bool Manager::removeGrowth(int check)
         growthPos = Pos(0, 0);
         return true;
     }
-    else if (check == 1)
+    else if (check == 1)    //snake head가 Growth 아이템을 접촉했을 때
     {
         mapStatus[y][x] = Empty();
         mapCodes[y][x] = 0;
@@ -136,10 +142,12 @@ bool Manager::removeGrowth(int check)
     else
         return false;
 }
-
+/*이미 Poison 아이템이 생성되어 있으면 fasle 반환
+  아이템이 생성되어 있지 않으면 아이템 생성 및 생성 시간 기록, 벽을 제외한 빈공간 중 랜덤한 좌표를 아이템 좌표로 설정
+  아이템이 생성되어 있다고 표시 후 true 반환*/
 bool Manager::createPoison()
 {
-    if (isPoisonCreated)
+    if (isPoisonCreated)   //이미 아이템이 생성되어 있을 때
     {
         return false;
     }
@@ -163,13 +171,16 @@ bool Manager::createPoison()
         return true;
     }
 }
-
+/*Poison 아이템이 생성되어 있는 상태에서 현재 시간을 측정,
+  만약 snake head가 Poison 아이템을 접촉하지 않았고 Poison 아이템 생성 시간과 현재 시간이 5초 차이가 날 때 게임 맵에서 아이템을 삭제한 뒤 아이템 생성 여부를 false로 표시한 후, true 반환
+  만약 snake head가 Poison 아이템을 접촉했을 때 즉시 게임 맵에서 아이템을 삭제한 뒤 아이템 생성 여부를 false로 표시한 후, true 반환
+  두 조건에 해당되지 않으면 false를 반환*/
 bool Manager::removePoison(int check)
 {
     time_t end = time(NULL);
     int y = poisonPos.y, x = poisonPos.x;
 
-    if ((check == 0) && isPoisonCreated && (end - poisonCreatedTime > POISON_DURATION))
+    if ((check == 0) && isPoisonCreated && (end - poisonCreatedTime > POISON_DURATION))    //snake head가 Poison 아이템을 접촉하지 않았고 Poison 아이템 생성 시간과 현재 시간이 5초 차이가 날 때
     {
         mapStatus[y][x] = Empty();
         mapCodes[y][x] = 0;
@@ -177,7 +188,7 @@ bool Manager::removePoison(int check)
         poisonPos = Pos(0, 0);
         return true;
     }
-    else if (check == 1)
+    else if (check == 1)    //snake head가 Poison 아이템을 접촉했을 때
     {
         mapStatus[y][x] = Empty();
         mapCodes[y][x] = 0;
@@ -188,7 +199,11 @@ bool Manager::removePoison(int check)
     else
         return false;
 }
-
+/*snake head의 currentpos값과 Growth / Poison 아이템 객체의 위치 좌표값을 비교
+  만약 snake head가 Growth 아이템을 접촉했을 때 snake의 몸 길이를 늘리는 lengthen()함수 소환, snake의 Growth 아이템 이용 횟수에 +1, Growth 아이템 제거 및 true 반환
+  만약 snake head가 Poison 아이템을 접촉했을 때 snake의 몸 길이를 줄이는 shorten()함수 소환, 몸 길이를 줄인 결과 길이가 3이상일 때 snake의 Poison 아이템 이용 횟수에 +1, Poison 아이템 제거 및 true 반환
+  몸 길이를 줄인 결과 길이가 2이하일 때 snake의 Poison 아이템 이용 횟수에 +1, Poison 아이템 제거 및 false 반환 (useItem()반환 결과 false일 경우, 게임 오버)
+  아무런 조건에 해당되지 않아도 true 반환*/
 bool Manager::useItem(Snake &s)
 {
     Body snakeHead = *(s).getHead();
@@ -196,24 +211,24 @@ bool Manager::useItem(Snake &s)
     {
         for (int j = 0; j < SIZE_X; j++)
         {
-            if ((mapCodes[i][j] == GROWTH_CODE) && snakeHead.getPos() == Pos(j + 1, i + 1))
+            if ((mapCodes[i][j] == GROWTH_CODE) && snakeHead.getPos() == Pos(j + 1, i + 1))   //snake head가 Growth 아이템을 접촉했을 때
             {
-                s.lengthen();
+                s.lengthen();   //snake 몸 길이 늘리기
                 int growthCnt = s.getGrowthCnt();
-                s.setGrowhCnt(growthCnt + 1);
+                s.setGrowhCnt(growthCnt + 1);   //snake의 Growth 아이템 이용 횟수에 +1
                 removeGrowth(1);
                 return true;
             }
-            else if ((mapCodes[i][j] == POISON_CODE) && snakeHead.getPos() == Pos(j + 1, i + 1))
+            else if ((mapCodes[i][j] == POISON_CODE) && snakeHead.getPos() == Pos(j + 1, i + 1))   //snake head가 Poison 아이템을 접촉했을 때
             {
-                if (s.shorten())
+                if (s.shorten())   //snake의 몸 길이를 줄였을 때 snake 몸 길이가 3이상일 때
                 {
                     int poisonCnt = s.getPoisonCnt();
                     s.setPoisonCnt(poisonCnt + 1);
                     removePoison(1);
                     return true;
                 }
-                else
+                else    ////snake의 몸 길이를 줄였을 때 snake 몸 길이가 2이하일 때
                 {
                     int poisonCnt = s.getPoisonCnt();
                     s.setPoisonCnt(poisonCnt + 1);

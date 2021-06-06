@@ -47,7 +47,7 @@ private:
   // Constructor에서 다시 instance를 만들어 제대로 초기화해줌
   Snake snake;
 
-  // 현재 생성된 아이템의 개수를 기록하는 변수
+  // 현재 아이템이 생성되어 있는지 여부를 기록하는 변수
   bool isGrowthCreated = false;
   bool isPoisonCreated = false;
   //현재 생성된 아이템의 좌표를 기록하는 변수
