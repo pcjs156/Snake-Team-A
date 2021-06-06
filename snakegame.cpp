@@ -241,6 +241,9 @@ int main()
           {
             isGameOver = true;
           }
+          else if((map[i][j] == 2) && (bodies[0].getCurrentX() == j + 1) && (bodies[0].getCurrentY() == i + 1)){
+            isGameOver = true;
+          }
         }
       }
       //몸체 부딪침 확인
