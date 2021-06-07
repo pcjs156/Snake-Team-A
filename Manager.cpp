@@ -13,8 +13,7 @@ Manager::Manager(int stageNumber) : STAGE_NUM(stageNumber)
         mapStatus[i] = new Object[SIZE_X];
 
     // 맵 파일을 여는데 실패하면 예외 발생(처리 안함)
-    string map = "_rule4_v";
-    ifstream mapFile("./maps/map" + map + ".txt");
+    ifstream mapFile("./maps/map_rule4_v.txt");
     if (!mapFile.is_open())
         throw MapFIleOpenFailedException();
     // 맵 파일을 열었으면 map에 정수로 데이터 유형 저장

@@ -275,15 +275,6 @@ int main()
       {
         manager.turnOnGate(snake);
       }
-      // 게이트가 활성되어 있는 경우, 게이트 진입점에 꼬리가 도달했는지 확인
-      // if ()
-      // {
-      //   manager.removeGate();
-      // }
-      // 만약 게이트가 활성화 되어 있지 않은 상태라면,
-      // removeGate 내부에서 조건을 검사하고 게이트를 삭제한다.
-      // else
-      // {
       // 게이트가 활성화되어 있지 않은 경우 게이트 삭제를 시도
       // 게이트의 삭제 조건은 revmoeGate에서 따짐
       if (!manager.isGateActivated())
