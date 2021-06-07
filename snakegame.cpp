@@ -183,6 +183,7 @@ int main()
                  이것을 해결하기 위해, clock() 함수를 이용한 새로운 sleep 기능 구현 */
       long int refTime = clock(); //프로그램이 시작한 시점부터 현재까지 경과한 시간
       long int currentTime = 0;
+      int check; //사용자 키 입력이 방향키일 땐 값이 1, 아닐 땐 0
       while (1)
       {
         if (kbhit())
@@ -192,17 +193,26 @@ int main()
           {
           case KEY_LEFT:
             newdirection.setDirection(-1, 0);
+            check = 1;
             break;
           case KEY_RIGHT:
             newdirection.setDirection(1, 0);
+            check = 1;
             break;
           case KEY_UP:
             newdirection.setDirection(0, -1);
+            check = 1;
             break;
           case KEY_DOWN:
             newdirection.setDirection(0, 1);
+            check = 1;
+            break;
+          default:
+            check = 0;
             break;
           }
+          if(check ==0)  //사용자 키 입력이 방향키 값이 아닐 경우 루프 처음으로 돌아감
+            continue;
           /*사용자가 입력한 방향을 snake head의 새로운 방향으로 갱신
                       이때 기존 snake head의 뱡향과 반대되는 뱡향이 입력 될 경우에는 게임 오버*/
           if (snake.changeHeadDirection(newdirection) != true)
