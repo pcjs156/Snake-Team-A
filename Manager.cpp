@@ -13,7 +13,8 @@ Manager::Manager(int stageNumber) : STAGE_NUM(stageNumber)
         mapStatus[i] = new Object[SIZE_X];
 
     // 맵 파일을 여는데 실패하면 예외 발생(처리 안함)
-    ifstream mapFile("./maps/map" + to_string(STAGE_NUM) + ".txt");
+    string map = "_rule4_v";
+    ifstream mapFile("./maps/map" + map + ".txt");
     if (!mapFile.is_open())
         throw MapFIleOpenFailedException();
     // 맵 파일을 열었으면 map에 정수로 데이터 유형 저장
@@ -90,7 +91,7 @@ Manager::~Manager()
   아이템 생성 여부를 true로 표시 후 true 반환*/
 bool Manager::createGrowth()
 {
-    if (isGrowthCreated)    //이미 아이템이 생성되어 있을 때
+    if (isGrowthCreated) //이미 아이템이 생성되어 있을 때
     {
         return false;
     }
@@ -123,7 +124,7 @@ bool Manager::removeGrowth(int check)
     time_t end = time(NULL);
     int y = growthPos.y, x = growthPos.x;
 
-    if ((check == 0) && isGrowthCreated && (end - growthCreatedTime > GROWTH_DURATION))   //snake head가 Growth 아이템을 접촉하지 않았고 Growth 아이템 생성 시간과 현재 시간이 5초 차이가 날 때
+    if ((check == 0) && isGrowthCreated && (end - growthCreatedTime > GROWTH_DURATION)) //snake head가 Growth 아이템을 접촉하지 않았고 Growth 아이템 생성 시간과 현재 시간이 5초 차이가 날 때
     {
         mapStatus[y][x] = Empty();
         mapCodes[y][x] = 0;
@@ -131,7 +132,7 @@ bool Manager::removeGrowth(int check)
         growthPos = Pos(0, 0);
         return true;
     }
-    else if (check == 1)    //snake head가 Growth 아이템을 접촉했을 때
+    else if (check == 1) //snake head가 Growth 아이템을 접촉했을 때
     {
         mapStatus[y][x] = Empty();
         mapCodes[y][x] = 0;
@@ -147,7 +148,7 @@ bool Manager::removeGrowth(int check)
   아이템이 생성되어 있다고 표시 후 true 반환*/
 bool Manager::createPoison()
 {
-    if (isPoisonCreated)   //이미 아이템이 생성되어 있을 때
+    if (isPoisonCreated) //이미 아이템이 생성되어 있을 때
     {
         return false;
     }
@@ -180,7 +181,7 @@ bool Manager::removePoison(int check)
     time_t end = time(NULL);
     int y = poisonPos.y, x = poisonPos.x;
 
-    if ((check == 0) && isPoisonCreated && (end - poisonCreatedTime > POISON_DURATION))    //snake head가 Poison 아이템을 접촉하지 않았고 Poison 아이템 생성 시간과 현재 시간이 5초 차이가 날 때
+    if ((check == 0) && isPoisonCreated && (end - poisonCreatedTime > POISON_DURATION)) //snake head가 Poison 아이템을 접촉하지 않았고 Poison 아이템 생성 시간과 현재 시간이 5초 차이가 날 때
     {
         mapStatus[y][x] = Empty();
         mapCodes[y][x] = 0;
@@ -188,7 +189,7 @@ bool Manager::removePoison(int check)
         poisonPos = Pos(0, 0);
         return true;
     }
-    else if (check == 1)    //snake head가 Poison 아이템을 접촉했을 때
+    else if (check == 1) //snake head가 Poison 아이템을 접촉했을 때
     {
         mapStatus[y][x] = Empty();
         mapCodes[y][x] = 0;
@@ -211,24 +212,24 @@ bool Manager::useItem(Snake &s)
     {
         for (int j = 0; j < SIZE_X; j++)
         {
-            if ((mapCodes[i][j] == GROWTH_CODE) && snakeHead.getPos() == Pos(j + 1, i + 1))   //snake head가 Growth 아이템을 접촉했을 때
+            if ((mapCodes[i][j] == GROWTH_CODE) && snakeHead.getPos() == Pos(j + 1, i + 1)) //snake head가 Growth 아이템을 접촉했을 때
             {
-                s.lengthen();   //snake 몸 길이 늘리기
+                s.lengthen(); //snake 몸 길이 늘리기
                 int growthCnt = s.getGrowthCnt();
-                s.setGrowhCnt(growthCnt + 1);   //snake의 Growth 아이템 이용 횟수에 +1
+                s.setGrowhCnt(growthCnt + 1); //snake의 Growth 아이템 이용 횟수에 +1
                 removeGrowth(1);
                 return true;
             }
-            else if ((mapCodes[i][j] == POISON_CODE) && snakeHead.getPos() == Pos(j + 1, i + 1))   //snake head가 Poison 아이템을 접촉했을 때
+            else if ((mapCodes[i][j] == POISON_CODE) && snakeHead.getPos() == Pos(j + 1, i + 1)) //snake head가 Poison 아이템을 접촉했을 때
             {
-                if (s.shorten())   //snake의 몸 길이를 줄였을 때 snake 몸 길이가 3이상일 때
+                if (s.shorten()) //snake의 몸 길이를 줄였을 때 snake 몸 길이가 3이상일 때
                 {
                     int poisonCnt = s.getPoisonCnt();
                     s.setPoisonCnt(poisonCnt + 1);
                     removePoison(1);
                     return true;
                 }
-                else    ////snake의 몸 길이를 줄였을 때 snake 몸 길이가 2이하일 때
+                else ////snake의 몸 길이를 줄였을 때 snake 몸 길이가 2이하일 때
                 {
                     int poisonCnt = s.getPoisonCnt();
                     s.setPoisonCnt(poisonCnt + 1);
@@ -410,29 +411,35 @@ void Manager::turnOnGate(Snake &s)
             int oppositeX = oppositeDir.getXDirection();
             int oppositeY = oppositeDir.getYDirection();
 
+            Direction newDirection = Direction(0, 0);
+
             if (mapCodes[exitY + clockwiseY][exitX + clockwiseX] == EMPTY_CODE)
             {
                 dx = clockwiseX;
                 dy = clockwiseY;
+                newDirection = clockwiseDir;
             }
             // 2. 반시계 방향 시도
             else if (mapCodes[exitY + counterY][exitX + counterX] == EMPTY_CODE)
             {
                 dx = counterX;
                 dy = counterY;
+                newDirection = counterClockwiseDir;
             }
             // 3. 반대 방향 시도
             else if (mapCodes[exitY + oppositeY][exitX + oppositeX] == EMPTY_CODE)
             {
                 dx = oppositeX;
                 dy = oppositeY;
+                newDirection = oppositeDir;
             }
 
-            outX += dx;
-            outY += dy;
+            // 위치 보정
+            outX += dx + 1;
+            outY += dy + 1;
 
             (*(s.getHead())).setNextPos(Pos(outX, outY));
-            s.setLastDirection(clockwiseDir);
+            s.setLastDirection(newDirection);
         }
     }
 }

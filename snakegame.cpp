@@ -17,7 +17,7 @@ using namespace std;
 // 정적 전역 변수 설정
 const int TICK = 0.5;       // 화면을 갱신할 주기
 const int TOTAL_STAGES = 1; // 스테이지 개수
-const clock_t TICK_MILSEC = 50000000000;
+const clock_t TICK_MILSEC = 10000000000;
 
 // 게임 보드의 실제 크기
 const int BOARD_SIZE_Y = 25;
@@ -241,7 +241,8 @@ int main()
           {
             isGameOver = true;
           }
-          else if((map[i][j] == 2) && (bodies[0].getCurrentX() == j + 1) && (bodies[0].getCurrentY() == i + 1)){
+          else if ((map[i][j] == 2) && (bodies[0].getCurrentX() == j + 1) && (bodies[0].getCurrentY() == i + 1))
+          {
             isGameOver = true;
           }
         }
@@ -253,7 +254,7 @@ int main()
       manager.createGrowth();
       manager.createPoison();
       //아이템과 snake가 접촉하였는지 확인 및 아이템 사용 및 아이템 삭제
-      if (manager.useItem(snake) == false)    //snake 길이가 3보다 짧아질 경우 게임 오버
+      if (manager.useItem(snake) == false) //snake 길이가 3보다 짧아질 경우 게임 오버
         isGameOver = true;
       //아이템 사용을 하지 않았고 생성된지 5초가 경과되었을 경우 아이템 삭제
       manager.removeGrowth(0);
