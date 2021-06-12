@@ -120,39 +120,18 @@ public:
 
   // Getter finished ================================================
   // GameOver Condition begins ======================================
-  bool isGameCleared(Snake &s)
-  {
-    return (
-        isBodyConditionCleared(s) &&
-        isGrowthConditionCleared(s) &&
-        isPoisonConditionCleared(s) &&
-        isGateConditionCleared(s));
-  }
-
-  bool isMaxLength(Snake &s)
-  {
-    return (s.getLength() == maxBodyLength);
-  }
-
-  bool isBodyConditionCleared(Snake &s)
-  {
-    return (s.getLength() >= bodyLengthCondition);
-  }
-
-  bool isGrowthConditionCleared(Snake &s)
-  {
-    return (s.getGrowthCnt() >= growthCntCondition);
-  }
-
-  bool isPoisonConditionCleared(Snake &s)
-  {
-    return (s.getPoisonCnt() >= poisonCntCondition);
-  }
-
-  bool isGateConditionCleared(Snake &s)
-  {
-    return (s.getGateCnt() >= gateCntCondition);
-  }
+  // 스테이지 클리어 여부를 반환하는 메서드
+  bool isGameCleared(Snake &s);
+  // snake가 최대 길이에 도달했는지 판단하는 메서드
+  bool isMaxLength(Snake &s);
+  // body length 스테이지 클리어 조건을 완료했는지 판단하는 메서드
+  bool isBodyConditionCleared(Snake &s);
+  // growth count 스테이지 클리어 조건을 완료했는지 판단하는 메서드
+  bool isGrowthConditionCleared(Snake &s);
+  // poison count 스테이지 클리어 조건을 완료했는지 판단하는 메서드
+  bool isPoisonConditionCleared(Snake &s);
+  // gate 사용 횟수 스테이지 클리어 조건을 완료했는지 판단하는 메서드
+  bool isGateConditionCleared(Snake &s);
 
   // GameOver Condition finished ====================================
   // items begins ===================================================

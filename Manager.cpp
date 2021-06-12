@@ -102,6 +102,42 @@ Manager::~Manager()
 }
 
 // Constructor/Destructor finished ================================
+// GameOver Condition begins ======================================
+bool Manager::isGameCleared(Snake &s)
+{
+    return (
+        isBodyConditionCleared(s) &&
+        isGrowthConditionCleared(s) &&
+        isPoisonConditionCleared(s) &&
+        isGateConditionCleared(s));
+}
+
+bool Manager::isMaxLength(Snake &s)
+{
+    return (s.getLength() == maxBodyLength);
+}
+
+bool Manager::isBodyConditionCleared(Snake &s)
+{
+    return (s.getLength() >= bodyLengthCondition);
+}
+
+bool Manager::isGrowthConditionCleared(Snake &s)
+{
+    return (s.getGrowthCnt() >= growthCntCondition);
+}
+
+bool Manager::isPoisonConditionCleared(Snake &s)
+{
+    return (s.getPoisonCnt() >= poisonCntCondition);
+}
+
+bool Manager::isGateConditionCleared(Snake &s)
+{
+    return (s.getGateCnt() >= gateCntCondition);
+}
+
+// GameOver Condition finished ====================================
 // items begins ===================================================
 /*이미 Growth 아이템이 생성되어 있으면 fasle 반환
   아이템이 생성되어 있지 않으면 아이템 생성 및 생성 시간 기록, 게임 맵에서 벽을 제외한 빈공간 중 랜덤한 좌표를 아이템 좌표로 설정
