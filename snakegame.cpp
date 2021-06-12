@@ -16,7 +16,7 @@ using namespace std;
 
 // 정적 전역 변수 설정
 const int TICK = 0.5;       // 화면을 갱신할 주기
-const int TOTAL_STAGES = 2; // 스테이지 개수
+const int TOTAL_STAGES = 4; // 스테이지 개수
 const clock_t TICK_MILSEC = 10000000000;
 
 // 게임 보드의 실제 크기
@@ -171,7 +171,7 @@ int main()
     //현재 스테이지의 맵 상태 객체 생성
     Object **mapStatus = manager.getMapStatus();
     //현 스테이지에 나타낼 snake 생성
-    Snake snake = manager.getSnake();
+    Snake snake(manager.getInitPos());
     // 스테이지 시작
     isGameOver = false;
     while (!isGameOver)

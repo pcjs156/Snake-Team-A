@@ -91,6 +91,28 @@ Snake::Snake(int initX, int initY)
     bodies.push_back(Body(initX + 2, initY, initX + 1, initY));
 }
 
+Snake::Snake(Pos initPos)
+{
+    // ()= 연산자 오버로딩에 사용됨)
+    this->initX = initPos.x;
+    this->initY = initPos.y;
+
+    // 몸 길이 초기화
+    length = 3;
+    // 아이템 획득/게이트 통과 횟수 초기화
+    growthCnt = 0;
+    poisonCnt = 0;
+    gateCnt = 0;
+
+    // 왼쪽 방향을 기본 방향으로 함
+    lastDirection = Direction::getDirectionBySymbol('L');
+
+    // 맨 처음에는 ">~~" 이렇게 왼쪽을 보고 움직이도록 설정
+    bodies.push_back(Body(initX, initY, initX - 1, initY));
+    bodies.push_back(Body(initX + 1, initY, initX, initY));
+    bodies.push_back(Body(initX + 2, initY, initX + 1, initY));
+}
+
 Snake &Snake::operator=(const Snake &s)
 {
     // ()= 연산자 오버로딩에 사용됨)

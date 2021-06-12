@@ -86,9 +86,7 @@ Manager::Manager(int stageNumber) : STAGE_NUM(stageNumber)
             }
         }
     }
-    //스테이지 초기 Snake 몸통의 좌표값을 설정
-    Snake temp(initSnakeX, initSnakeY);
-    snake = temp;
+    initPos = Pos(initSnakeX, initSnakeY);
 }
 
 Manager::~Manager()

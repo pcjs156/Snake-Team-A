@@ -48,9 +48,8 @@ private:
   // 맵의 현재 상태(아이템 객체 등)를 Object 객체로 저장할 2차원 배열
   Object **mapStatus;
 
-  // Snake를 가리키고 있음 -> 매 스테이지가 끝날 때마다 새로 갱신해주어야 함
-  // Constructor에서 다시 instance를 만들어 제대로 초기화해줌
-  Snake snake;
+  // snake의 초기 위치
+  Pos initPos = Pos(0, 0);
 
   // 현재 아이템이 생성되어 있는지 여부를 기록하는 변수
   bool isGrowthCreated = false;
@@ -104,8 +103,9 @@ public:
   int **getMapCodes() { return mapCodes; }
   // 맵 상태 정보를 반환
   Object **getMapStatus() { return mapStatus; }
-  // Snake 인스턴스를 반환
-  Snake getSnake() const { return snake; }
+
+  // Snake의 초기 좌표를 반환
+  Pos getInitPos() { return initPos; }
 
   // 가능한 최대 몸 길이를 반환하는 메서드
   int getMaxBodyLength() { return maxBodyLength; }

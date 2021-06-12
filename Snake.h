@@ -229,6 +229,7 @@ public:
   // Constructor
   Snake() {}
   Snake(int initX, int initY);
+  Snake(Pos initPos);
 
   Snake &operator=(const Snake &s);
 
