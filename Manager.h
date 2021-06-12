@@ -23,6 +23,11 @@ class MapFIleOpenFailedException
 {
 };
 
+// 규칙 파일을 여는데 실패했을 때 발생하는 예외
+class RuleFileOpenFailedException
+{
+};
+
 // 맵 파일에 유효하지 않은 심볼이 있을 때 발생하는 예외
 class InvalidSymbolException
 {
@@ -58,7 +63,7 @@ private:
   time_t poisonCreatedTime;
   // 아이템의 유지 시간(초)
   const int GROWTH_DURATION = 60;
-  const int POISON_DURATION = 5;
+  const int POISON_DURATION = 60;
 
   // 현재 게이트가 생성되어 있는지 여부를 기록하는 변수
   bool isGateCreated = false;
@@ -66,15 +71,26 @@ private:
   Pos gateEntrancePos = Pos(0, 0);
   Pos gateExitPos = Pos(0, 0);
   // 게이트 생성이 시작되는 snake의 길이
-  const int GATE_GENERATE_LEN = 3;
+  const int GATE_GENERATE_LEN = 5;
   // 게이트 유지 시간(초)
-  const int GATE_DURATION_SEC = 60;
+  const int GATE_DURATION_SEC = 20;
   // 게이트 생성 주기
   const int GATE_COOLTIME = 2;
   // 게이트가 snake의 위치를 갱신할(snake가 앞으로 위치를 갱신할 수 있는) 횟수
   int gateActivationLeft = 0;
   // 마지막으로 게이트가 생성된 시각
   time_t gateGenerated = 0;
+
+  // 최대 몸 길이
+  int maxBodyLength = 0;
+  // 스테이지 클리어 조건: Body Length
+  int bodyLengthCondition = 0;
+  // 스테이지 클리어 조건: Growth Count
+  int growthCntCondition = 0;
+  // 스테이지 클리어 조건: Poison Count
+  int poisonCntCondition = 0;
+  // 스테이지 클리어 조건: Gate Count
+  int gateCntCondition = 0;
 
 public:
   // Constructor/Destructor Overriding begins =======================
@@ -91,12 +107,59 @@ public:
   // Snake 인스턴스를 반환
   Snake getSnake() const { return snake; }
 
+  // 가능한 최대 몸 길이를 반환하는 메서드
+  int getMaxBodyLength() { return maxBodyLength; }
+  // 몸 길이 클리어 조건을 반환하는 메서드
+  int getBodyLengthCondition() { return bodyLengthCondition; }
+  // Growth 클리어 조건 개수를 반환하는 메서드
+  int getGrowthCntCondition() { return growthCntCondition; }
+  // Poison 클리어 조건 개수를 반환하는 메서드
+  int getPoisonCntCondition() { return poisonCntCondition; }
+  // 게이트 클리어 조건 개수를 반환하는 메서드
+  int getGateCntCondition() { return gateCntCondition; }
+
   // Getter finished ================================================
+  // GameOver Condition begins ======================================
+  bool isGameCleared(Snake &s)
+  {
+    return (
+        isBodyConditionCleared(s) &&
+        isGrowthConditionCleared(s) &&
+        isPoisonConditionCleared(s) &&
+        isGateConditionCleared(s));
+  }
+
+  bool isMaxLength(Snake &s)
+  {
+    return (s.getLength() == maxBodyLength);
+  }
+
+  bool isBodyConditionCleared(Snake &s)
+  {
+    return (s.getLength() >= bodyLengthCondition);
+  }
+
+  bool isGrowthConditionCleared(Snake &s)
+  {
+    return (s.getGrowthCnt() >= growthCntCondition);
+  }
+
+  bool isPoisonConditionCleared(Snake &s)
+  {
+    return (s.getPoisonCnt() >= poisonCntCondition);
+  }
+
+  bool isGateConditionCleared(Snake &s)
+  {
+    return (s.getGateCnt() >= gateCntCondition);
+  }
+
+  // GameOver Condition finished ====================================
   // items begins ===================================================
   /* Growth를 생성하는 메서드
        Growth가 생성되어 있다면 Growth를 생성하지 않고 false를 반환한다.
        Growth가 생성되어 있지 않다면 Growth를 생성하고 true를 반환한다. */
-  bool createGrowth();
+  bool createGrowth(Snake &s);
 
   /* Growth를 삭제하는 메서드
     Growth가 생성되어 있다면 Growth 자리를 비워두고 true를 반환한다.

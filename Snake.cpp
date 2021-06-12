@@ -139,7 +139,7 @@ Body Snake::getLastBody()
 // Setter =============================================
 void Snake::setGrowhCnt(int cnt) { this->growthCnt = cnt; };
 void Snake::setPoisonCnt(int cnt) { this->poisonCnt = cnt; };
-void Snake::setGateCnt(int cnt) { this->gateCnt; };
+void Snake::setGateCnt(int cnt) { this->gateCnt = cnt; };
 void Snake::setHeadPos(Pos p)
 {
     bodies[0].setPos(p);
@@ -153,9 +153,9 @@ void Snake::setLastDirection(Direction d)
 //snake의 몸 길이를 1만큼 줄이기
 bool Snake::shorten()
 {
-    if (length == MIN_LENGTH)  //현재 몸 길이가 3인 경우 줄일 수가 없기 때문에 false 반환
+    if (length == MIN_LENGTH) //현재 몸 길이가 3인 경우 줄일 수가 없기 때문에 false 반환
         return false;
-    else   //현재 몸 길이가 3보다 큰 경우
+    else //현재 몸 길이가 3보다 큰 경우
     {
         length -= 1;
         bodies.pop_back();

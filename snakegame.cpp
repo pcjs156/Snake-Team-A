@@ -16,7 +16,7 @@ using namespace std;
 
 // 정적 전역 변수 설정
 const int TICK = 0.5;       // 화면을 갱신할 주기
-const int TOTAL_STAGES = 1; // 스테이지 개수
+const int TOTAL_STAGES = 2; // 스테이지 개수
 const clock_t TICK_MILSEC = 10000000000;
 
 // 게임 보드의 실제 크기
@@ -160,10 +160,11 @@ int main()
   wrefresh(messageWindow);
   // 이상 메시지 윈도우 초기 설정 =============================================
 
+  bool isGameOver = false;
   int currentStage = 0;          // 스테이지 번호
   time_t startTime = time(NULL); // 게임 시작 시각(초)
   // 게임 루프 시작
-  while (currentStage++ < TOTAL_STAGES)
+  while (currentStage++ < TOTAL_STAGES && !isGameOver)
   {
     // 스테이지 매니저 객체 생성
     Manager manager(currentStage);
@@ -172,7 +173,7 @@ int main()
     //현 스테이지에 나타낼 snake 생성
     Snake snake = manager.getSnake();
     // 스테이지 시작
-    bool isGameOver = false;
+    isGameOver = false;
     while (!isGameOver)
     {
       //사용자가 입력한 방향을 나타낼 변수(기본 방향 (0, 0))
@@ -211,7 +212,7 @@ int main()
             check = 0;
             break;
           }
-          if(check ==0)  //사용자 키 입력이 방향키 값이 아닐 경우 루프 처음으로 돌아감
+          if (check == 0) //사용자 키 입력이 방향키 값이 아닐 경우 루프 처음으로 돌아감
             continue;
           /*사용자가 입력한 방향을 snake head의 새로운 방향으로 갱신
                       이때 기존 snake head의 뱡향과 반대되는 뱡향이 입력 될 경우에는 게임 오버*/
@@ -228,9 +229,6 @@ int main()
           currentTime = 0;
           break;
         }
-        /* 값을 TICK_MILSEC으로 설정한 것은 이 값보다 작게 설정하면 너무 짧은 시간 간격으로 렌더링이 이뤄져서
-                     지렁이 이동속도가 넘무 빠르고 너무 큰 수를 하면 너무 delay가 심해서 적당한 값을 찾다가 TICK_MILSEC으로 설정하였습니다!
-                     값 수정하셔도 좋습니다!*/
       }
       //이하 데이터 갱신===============================================================
       //snake의 몸통 이동 데이터 갱신
@@ -261,7 +259,7 @@ int main()
       if (snake.isBumpedToBody())
         isGameOver = true;
       //벽과 지렁이가 있는 곳이 아닌 지점에 아이템 랜덤생성
-      manager.createGrowth();
+      manager.createGrowth(snake);
       manager.createPoison();
       //아이템과 snake가 접촉하였는지 확인 및 아이템 사용 및 아이템 삭제
       if (manager.useItem(snake) == false) //snake 길이가 3보다 짧아질 경우 게임 오버
@@ -270,7 +268,7 @@ int main()
       manager.removeGrowth(0);
       manager.removePoison(0);
       //다시 아이템 랜덤 생성
-      manager.createGrowth();
+      manager.createGrowth(snake);
       manager.createPoison();
 
       // 게이트 생성
@@ -283,6 +281,8 @@ int main()
       // snake의 위치와 스케줄을 갱신함
       if (manager.isHeadAtGate(snake))
       {
+        // 게이트 사용 횟수 증가
+        snake.setGateCnt(snake.getGateCnt() + 1);
         manager.turnOnGate(snake);
       }
       // 게이트가 활성화되어 있지 않은 경우 게이트 삭제를 시도
@@ -314,41 +314,87 @@ int main()
       // 스코어 보드 렌더링
       mvwprintw(scoreWindow, 4, 3, "Play Time:");
       mvwprintw(scoreWindow, 4, 14, to_string(time(NULL) - startTime).c_str());
+
       mvwprintw(scoreWindow, 5, 3, "B:");
       mvwprintw(scoreWindow, 5, 6, to_string(snake.getLength()).c_str());
+      mvwprintw(scoreWindow, 5, 8, (" /  " + to_string(manager.getMaxBodyLength())).c_str());
+
       mvwprintw(scoreWindow, 6, 3, "+:");
       mvwprintw(scoreWindow, 6, 6, to_string(snake.getGrowthCnt()).c_str());
+
       mvwprintw(scoreWindow, 7, 3, "-:");
       mvwprintw(scoreWindow, 7, 6, to_string(snake.getPoisonCnt()).c_str());
-      mvwprintw(scoreWindow, 8, 3, "G: 0");
+
+      mvwprintw(scoreWindow, 8, 3, "G:");
+      mvwprintw(scoreWindow, 8, 6, to_string(snake.getGateCnt()).c_str());
       wrefresh(scoreWindow);
 
       // 미션 보드 렌더링
       mvwprintw(missionWindow, 4, 3, "B: ");
+      mvwprintw(missionWindow, 4, 6, to_string(manager.getBodyLengthCondition()).c_str());
+      mvwprintw(missionWindow, 4, 9, (manager.isBodyConditionCleared(snake) ? "(V)" : "( )"));
+
       mvwprintw(missionWindow, 5, 3, "+: ");
+      mvwprintw(missionWindow, 5, 6, to_string(manager.getGrowthCntCondition()).c_str());
+      mvwprintw(missionWindow, 5, 9, (manager.isGrowthConditionCleared(snake) ? "(V)" : "( )"));
+
       mvwprintw(missionWindow, 6, 3, "-: ");
+      mvwprintw(missionWindow, 6, 6, to_string(manager.getPoisonCntCondition()).c_str());
+      mvwprintw(missionWindow, 6, 9, (manager.isPoisonConditionCleared(snake) ? "(V)" : "( )"));
+
       mvwprintw(missionWindow, 7, 3, "G: ");
+      mvwprintw(missionWindow, 7, 6, to_string(manager.getGateCntCondition()).c_str());
+      mvwprintw(missionWindow, 7, 9, (manager.isGateConditionCleared(snake) ? "(V)" : "( )"));
+
       wrefresh(missionWindow);
 
-      //메세지 보드 렌더링
-      /* 사용자가 입력하는 방향키가 어떤 것인지 게임상에서 확인 할 수 있도록
-                   메세치 창에 입력값이 보여지게 설정해보았습니다! 수정하셔도 상관없습니다!*/
-      string s;
-      s += snake.getlastdirection().getSymbol();
-      mvwprintw(messageWindow, 2, 6, "Your Keypad : ");
-      mvwprintw(messageWindow, 2, 20, s.c_str());
+      // //메세지 보드 렌더링
+      // /* 사용자가 입력하는 방향키가 어떤 것인지 게임상에서 확인 할 수 있도록
+      //              메세치 창에 입력값이 보여지게 설정해보았습니다! 수정하셔도 상관없습니다!*/
+      // string s;
+      // s += snake.getlastdirection().getSymbol();
+      // mvwprintw(messageWindow, 2, 6, "Your Keypad : ");
+      // mvwprintw(messageWindow, 2, 20, s.c_str());
+      // wrefresh(messageWindow);
+
+      // 스테이지 클리어시 게임 루프 종료
+      if (manager.isGameCleared(snake))
+        break;
+    } // 게임 루프 종료
+
+    // 게임 종료
+    if (isGameOver)
+    {
+      //게임 오버일 때 메세지 창에 게임오버 띄우기
+      mvwprintw(messageWindow, 2, 6, "! Game Over !");
       wrefresh(messageWindow);
     }
-    //게임 오버일 때 메세지 창에 게임오버 띄우기
-    mvwprintw(messageWindow, 2, 6, "! Game Over !");
+    // 게임 종료가 아닌데 메인 루프에서 빠져 나온 경우 스테이지 클리어를 의미함
+    else
+    {
+      if (currentStage == TOTAL_STAGES)
+        mvwprintw(messageWindow, 2, 6, "!!! GAME CLEAR !!!");
+      else
+        mvwprintw(messageWindow, 2, 6, "! STAGE CLEAR !");
+      wrefresh(messageWindow);
+    }
+
+    // 5초간 대기 후 다음 스테이지 이동 / 또는 프로그램 종료
+    clock_t sleepStart = clock();
+    while ((clock() - sleepStart) / CLOCKS_PER_SEC < 3)
+      continue;
+
+    // 메시지 화면 비우기
+    mvwprintw(messageWindow, 2, 6, "                 ");
     wrefresh(messageWindow);
   }
-  getch();
   delwin(gameWindow);
   delwin(scoreWindow);
   delwin(messageWindow);
   endwin();
 
+  cout << "\n"
+       << (isGameOver ? "GAME OVER" : "GAME CLEAR") << " | ";
   cout << "PLAY TIME: " << time(NULL) - startTime << "(SEC)" << endl;
 
   return 0;

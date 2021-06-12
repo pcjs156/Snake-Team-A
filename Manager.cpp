@@ -13,7 +13,7 @@ Manager::Manager(int stageNumber) : STAGE_NUM(stageNumber)
         mapStatus[i] = new Object[SIZE_X];
 
     // 맵 파일을 여는데 실패하면 예외 발생(처리 안함)
-    ifstream mapFile("./maps/map_rule4_v.txt");
+    ifstream mapFile("./maps/map" + to_string(stageNumber) + ".txt");
     if (!mapFile.is_open())
         throw MapFIleOpenFailedException();
     // 맵 파일을 열었으면 map에 정수로 데이터 유형 저장
@@ -52,6 +52,26 @@ Manager::Manager(int stageNumber) : STAGE_NUM(stageNumber)
             }
         }
     }
+    mapFile.close();
+
+    // 규칙 파일을 여는데 실패하면 예외 발생(처리 안함)
+    ifstream ruleFile("./rules/rule" + to_string(stageNumber) + ".txt");
+    if (!ruleFile.is_open())
+        throw RuleFileOpenFailedException();
+    // 규칙 파일을 열었으면 스테이지 클리어 규칙에 해당하는 변수를 초기화
+    else
+    {
+        int *conditionRefs[5] = {&maxBodyLength, &bodyLengthCondition, &growthCntCondition, &poisonCntCondition, &gateCntCondition};
+        string buffer;
+        // 최대 몸길이 / 몸길이 조건, Growth, Poison, Gate 사용 횟수 조건 5개의 규칙을 저장함
+        for (int i = 0; i < 5; i++)
+        {
+            getline(ruleFile, buffer);
+            *conditionRefs[i] = stoi(buffer);
+        }
+    }
+    ruleFile.close();
+
     // 맵 파일 속 초기 Snake 위치/인스턴스 초기화
     int initSnakeX, initSnakeY;
     for (int i = 0; i < SIZE_Y; i++)
@@ -87,10 +107,11 @@ Manager::~Manager()
 // items begins ===================================================
 /*이미 Growth 아이템이 생성되어 있으면 fasle 반환
   아이템이 생성되어 있지 않으면 아이템 생성 및 생성 시간 기록, 게임 맵에서 벽을 제외한 빈공간 중 랜덤한 좌표를 아이템 좌표로 설정
-  아이템 생성 여부를 true로 표시 후 true 반환*/
-bool Manager::createGrowth()
+  아이템 생성 여부를 true로 표시 후 true 반환
+  설정된 최대 몸길이에 도달했을 경우 아이템 생성 X */
+bool Manager::createGrowth(Snake &s)
 {
-    if (isGrowthCreated) //이미 아이템이 생성되어 있을 때
+    if (isGrowthCreated || isMaxLength(s)) //이미 아이템이 생성되어 있을 때
     {
         return false;
     }
