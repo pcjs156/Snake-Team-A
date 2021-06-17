@@ -61,8 +61,8 @@ private:
   time_t growthCreatedTime;
   time_t poisonCreatedTime;
   // 아이템의 유지 시간(초)
-  const int GROWTH_DURATION = 60;
-  const int POISON_DURATION = 60;
+  const int GROWTH_DURATION = 7;
+  const int POISON_DURATION = 7;
 
   // 현재 게이트가 생성되어 있는지 여부를 기록하는 변수
   bool isGateCreated = false;
